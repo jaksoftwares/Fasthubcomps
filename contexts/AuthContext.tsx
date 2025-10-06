@@ -73,16 +73,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string) => {
     try {
-      const { token } = await AuthAPI.login({ email, password });
+      const { user, token } = await AuthAPI.login({ email, password });
       localStorage.setItem('fasthub-token', token);
 
-      const profile = await AuthAPI.getProfile(token);
-
       const loggedInUser: User = {
-        id: profile.user.id,
-        email: profile.user.email,
-        name: profile.user.name,
-        role: profile.user.role || 'customer',
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role || 'customer',
       };
 
       setUser(loggedInUser);
