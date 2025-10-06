@@ -20,7 +20,7 @@ export async function POST(req: Request) {
 
     // Get role from user metadata
     const role = authData.user.user_metadata?.role || 'customer';
-    const name = authData.user.user_metadata?.name || '';
+    const name = authData.user.user_metadata?.name || authData.user.email?.split('@')[0] || 'User';
     const phone = authData.user.user_metadata?.phone || null;
 
     return NextResponse.json({

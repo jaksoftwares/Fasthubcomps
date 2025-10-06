@@ -116,7 +116,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     const token = localStorage.getItem('fasthub-token');
-    if (token) await AuthAPI.logout(token);
+    if (token) {
+      try {
+        await AuthAPI.logout(token);
+      } catch (error) {
+        // Ignore logout API errors
+        console.error('Logout API error:', error);
+      }
+    }
     setUser(null);
     localStorage.removeItem('fasthub-user');
     localStorage.removeItem('fasthub-token');

@@ -24,7 +24,7 @@ export async function GET(req: Request) {
 
     const userId = decoded.sub;
     const email = decoded.email;
-    const name = decoded.user_metadata?.name || '';
+    const name = decoded.user_metadata?.name || email?.split('@')[0] || 'User';
     const phone = decoded.user_metadata?.phone || null;
     const role = decoded.user_metadata?.role || 'customer';
 
