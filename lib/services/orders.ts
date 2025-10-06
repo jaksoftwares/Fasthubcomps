@@ -1,9 +1,12 @@
-import { api } from "../api";
+import axios from 'axios';
+
+const API_URL = process.env.NEXT_PUBLIC_APP_URL!;
 
 export const OrdersAPI = {
-  getAll: () => api.get("/orders/"),
-  get: (id: string | number) => api.get(`/orders/${id}`),
-  create: (data: any) => api.post("/orders/", data),
-  update: (id: string | number, data: any) => api.put(`/orders/${id}`, data),
-  cancel: (id: string | number) => api.post(`/orders/${id}/cancel`),
+  getAll: async () => (await axios.get(`${API_URL}/api/orders`)).data,
+  getMyOrders: async (customerId: string) => (await axios.get(`${API_URL}/api/orders?customer_id=${customerId}`)).data,
+  get: async (id: string | number) => (await axios.get(`${API_URL}/api/orders/${id}`)).data,
+  create: async (data: any) => (await axios.post(`${API_URL}/api/orders`, data)).data,
+  update: async (id: string | number, data: any) => (await axios.patch(`${API_URL}/api/orders/${id}`, data)).data,
+  cancel: async (id: string | number) => (await axios.post(`${API_URL}/api/orders/${id}/cancel`)).data,
 };

@@ -16,11 +16,12 @@ const OrdersPage = () => {
 
   useEffect(() => {
     const fetchOrders = async () => {
+      if (!user) return;
       setLoading(true);
       setError(null);
       try {
         // You may need to pass a token or user id depending on your API
-        const data = await OrdersAPI.getMyOrders();
+        const data = await OrdersAPI.getMyOrders(user.id);
         setOrders(data);
       } catch (err: any) {
         setError(err?.message || "Failed to fetch orders");
@@ -28,7 +29,7 @@ const OrdersPage = () => {
         setLoading(false);
       }
     };
-    if (user) fetchOrders();
+    fetchOrders();
   }, [user]);
 
   if (!user) {

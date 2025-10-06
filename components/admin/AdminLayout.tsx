@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { LayoutDashboard, Package, ShoppingCart, Wrench, Users, Settings, ChartBar as BarChart3, Menu, X, LogOut, Chrome as Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,13 @@ interface AdminLayoutProps {
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
   const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/');
+  };
 
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -95,9 +101,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                 Back to Store
               </Button>
             </Link>
-            <Button 
-              variant="ghost" 
-              onClick={logout}
+            <Button
+              variant="ghost"
+              onClick={handleLogout}
               className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
             >
               <LogOut className="h-4 w-4 mr-3" />

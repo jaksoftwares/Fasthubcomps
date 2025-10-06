@@ -9,6 +9,7 @@ import OrderSummary from '@/components/checkout/OrderSummary';
 import PaymentMethods from '@/components/checkout/PaymentMethods';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { OrdersAPI } from '@/lib/services/orders';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -22,6 +23,7 @@ const CheckoutPage = () => {
   const [currentStep, setCurrentStep] = useState(1);
 
   const [orderData, setOrderData] = useState({
+    orderId: null as number | null,
     shipping: {
       name: '',
       address: '',
@@ -92,7 +94,31 @@ const CheckoutPage = () => {
 
 
 
-  const handleStepComplete = (stepData: any) => {
+  const handleStepComplete = async (stepData: any) => {
+    if (stepData.shipping) {
+      // Create order when shipping is completed
+      try {
+        const orderPayload = {
+          customer_id: user!.id,
+          products: cartState.items.map(item => ({
+            id: item.id,
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+          })),
+          total: cartState.total,
+          payment_method: 'Pending', // Will be updated later
+          shipping_address: stepData.shipping,
+        };
+        const order = await OrdersAPI.create(orderPayload);
+        stepData.orderId = order.id;
+      } catch (error) {
+        console.error('Failed to create order:', error);
+        setPaymentError('Failed to create order.');
+        return;
+      }
+    }
+
     // If payment step, check for payment status
     if (stepData.payment && stepData.payment.type === 'mpesa') {
       if (stepData.payment.status === 'pending') {

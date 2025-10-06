@@ -1,9 +1,11 @@
-import { api } from "../api";
+import axios from 'axios';
+
+const API_URL = process.env.NEXT_PUBLIC_APP_URL!;
 
 export const CustomersAPI = {
-  getAll: () => api.get("/customers/"),
-  get: (id: string | number) => api.get(`/customers/${id}`),
-  create: (data: any) => api.post("/customers/", data),
-  update: (id: string | number, data: any) => api.put(`/customers/${id}`, data),
-  delete: (id: string | number) => api.delete(`/customers/${id}`),
+  getAll: async () => (await axios.get(`${API_URL}/api/customers`)).data,
+  get: async (id: string | number) => (await axios.get(`${API_URL}/api/customers/${id}`)).data,
+  create: async (data: any) => (await axios.post(`${API_URL}/api/customers`, data)).data,
+  update: async (id: string | number, data: any) => (await axios.patch(`${API_URL}/api/customers/${id}`, data)).data,
+  delete: async (id: string | number) => (await axios.delete(`${API_URL}/api/customers/${id}`)).data,
 };

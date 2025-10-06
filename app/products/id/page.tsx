@@ -33,8 +33,8 @@ const ProductDetailPage = () => {
       setLoading(true);
       setError(null);
       try {
-        const data = await ProductsAPI.get(productId);
-        setProduct(data);
+      	const data = await ProductsAPI.get(productId);
+      	setProduct(data);
       } catch (err: any) {
         setError(err?.message || 'Failed to fetch product');
       } finally {
@@ -447,15 +447,15 @@ const RelatedProducts = ({ currentProduct }: { currentProduct: any }) => {
   const [related, setRelated] = React.useState<any[]>([]);
   React.useEffect(() => {
     const fetchRelated = async () => {
-      try {
-        const all = await ProductsAPI.getAll();
-        setRelated(
-          all.filter((p: any) =>
-            p.id !== currentProduct.id &&
-            (p.category === currentProduct.category || p.brand === currentProduct.brand)
-          ).slice(0, 4)
-        );
-      } catch {}
+    	try {
+    		const all = await ProductsAPI.getAll();
+    		setRelated(
+    			all.filter((p: any) =>
+    				p.id !== currentProduct.id &&
+    				(p.category === currentProduct.category || p.brand === currentProduct.brand)
+    			).slice(0, 4)
+    		);
+    	} catch {}
     };
     fetchRelated();
   }, [currentProduct]);

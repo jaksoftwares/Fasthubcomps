@@ -16,7 +16,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   register: (name: string, email: string, password: string, isAdmin?: boolean) => Promise<boolean>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -64,6 +64,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(false);
   }, []);
 
+  // Set loading to false after user is set
+  useEffect(() => {
+    if (user !== null || (localStorage.getItem('fasthub-user') === null && localStorage.getItem('fasthub-token') === null)) {
+      setIsLoading(false);
+    }
+  }, [user]);
+
   const login = async (email: string, password: string) => {
     try {
       const { token } = await AuthAPI.login({ email, password });
@@ -72,10 +79,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const profile = await AuthAPI.getProfile(token);
 
       const loggedInUser: User = {
-        id: profile.id,
-        email: profile.email,
-        name: profile.name,
-        role: profile.role || 'customer',
+        id: profile.user.id,
+        email: profile.user.email,
+        name: profile.user.name,
+        role: profile.user.role || 'customer',
       };
 
       setUser(loggedInUser);
@@ -109,9 +116,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
     const token = localStorage.getItem('fasthub-token');
-    if (token) AuthAPI.logout(token);
+    if (token) await AuthAPI.logout(token);
     setUser(null);
     localStorage.removeItem('fasthub-user');
     localStorage.removeItem('fasthub-token');

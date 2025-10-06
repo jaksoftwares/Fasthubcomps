@@ -59,11 +59,16 @@ const OrdersTable = () => {
     }
   };
 
-  const updateOrderStatus = (orderId: string, newStatus: string) => {
-    setOrders(orders.map(order => 
-      order.id === orderId ? { ...order, status: newStatus } : order
-    ));
-    toast.success('Order status updated successfully');
+  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    try {
+      await OrdersAPI.update(orderId, { status: newStatus });
+      setOrders(orders.map(order =>
+        order.id === orderId ? { ...order, status: newStatus } : order
+      ));
+      toast.success('Order status updated successfully');
+    } catch (err: any) {
+      toast.error('Failed to update order status');
+    }
   };
 
   // Map backend order data to frontend format
