@@ -8,47 +8,51 @@ export async function POST(req: Request) {
     const { name, email, password, phone = null, isAdmin = false } = await req.json();
     if (!name || !email || !password) return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
 
-    // Create Supabase auth user with role in metadata
-    const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
+    // Create Supabase auth user
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      email_confirm: true,
-      user_metadata: {
-        name,
-        phone,
-        role: isAdmin ? 'admin' : 'customer'
+      options: {
+        data: {
+          name,
+          phone,
+          role: isAdmin ? 'admin' : 'customer'
+        }
       }
     });
 
-    if (authError || !authUser?.user) {
+    if (error) {
       // Check if it's a duplicate email error
-      if (authError?.message?.includes('already registered')) {
+      if (error.message?.includes('already registered') || error.message?.includes('User already registered')) {
         return NextResponse.json({ error: "Email already registered" }, { status: 409 });
       }
-      return NextResponse.json({ error: authError?.message || "Auth creation failed" }, { status: 500 });
+      return NextResponse.json({ error: error.message || "Registration failed" }, { status: 500 });
     }
 
-    // Immediately sign in the user to get a token
-    const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (loginError || !loginData?.session) {
-      // If login fails, return error - user needs to login manually
-      return NextResponse.json({ error: "Account created but login failed. Please try logging in." }, { status: 500 });
+    if (!data.user) {
+      return NextResponse.json({ error: "Registration failed - no user created" }, { status: 500 });
     }
 
-    return NextResponse.json({
-      user: {
-        id: authUser.user.id,
-        name,
-        email,
-        phone,
-        role: isAdmin ? 'admin' : 'customer'
-      },
-      token: loginData.session.access_token
-    });
+    // Check if user is auto-confirmed (has session)
+    if (data.session) {
+      // User is confirmed, return token
+      return NextResponse.json({
+        user: {
+          id: data.user.id,
+          name,
+          email: data.user.email,
+          phone,
+          role: isAdmin ? 'admin' : 'customer'
+        },
+        token: data.session.access_token
+      });
+    } else {
+      // User needs email confirmation
+      return NextResponse.json({
+        success: false,
+        message: "Account created successfully. Please check your email to confirm your account, then try logging in."
+      });
+    }
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

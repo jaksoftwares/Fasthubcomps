@@ -25,19 +25,29 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     setIsLoading(true);
 
     try {
-      const success = isLogin
-        ? await login(formData.email, formData.password)
-        : await register(formData.name, formData.email, formData.password, formData.isAdmin);
-
-      if (success) {
-        toast.success(isLogin ? 'Logged in!' : 'Account created!');
+      if (isLogin) {
+        const success = await login(formData.email, formData.password);
+        if (success) {
+          toast.success('Logged in!');
+          onClose();
+          setFormData({ email: '', password: '', name: '', isAdmin: false });
+        } else {
+          toast.error('Login failed.');
+        }
+      } else {
+        await register(formData.name, formData.email, formData.password, formData.isAdmin);
+        toast.success('Account created successfully!');
+        onClose();
+        setFormData({ email: '', password: '', name: '', isAdmin: false });
+      }
+    } catch (error: any) {
+      if (error.message?.includes('Account created successfully')) {
+        toast.success(error.message);
         onClose();
         setFormData({ email: '', password: '', name: '', isAdmin: false });
       } else {
-        toast.error('Authentication failed.');
+        toast.error(error.message || 'Authentication failed.');
       }
-    } catch (error: any) {
-      toast.error(error.message || 'Authentication failed.');
     }
 
     setIsLoading(false);
