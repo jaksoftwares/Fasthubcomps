@@ -51,10 +51,10 @@ const AdminProductsPage = () => {
         </div>
 
         <ProductsTable />
-        
-        <AddProductModal 
-          isOpen={isAddModalOpen} 
-          onClose={() => setIsAddModalOpen(false)} 
+
+        <AddProductModal
+          isOpen={isAddModalOpen}
+          onClose={() => setIsAddModalOpen(false)}
         />
       </div>
     </AdminLayout>

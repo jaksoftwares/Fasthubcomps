@@ -82,7 +82,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onPr
     const imagePromises = images.map(async (img) => {
       const formData = new FormData();
       formData.append('file', img.file);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/products/upload-image`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/products/upload-image`, {
         method: 'POST',
         body: formData,
       });
@@ -90,7 +90,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onPr
         throw new Error('Failed to upload image');
       }
       const data = await response.json();
-      return data.url;
+      return data.secure_url || data.url;
     });
     let imageUrls: string[] = [];
     try {
