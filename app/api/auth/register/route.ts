@@ -35,17 +35,8 @@ export async function POST(req: Request) {
     });
 
     if (loginError || !loginData?.session) {
-      // If login fails, still return success but user will need to login manually
-      return NextResponse.json({
-        user: {
-          id: authUser.user.id,
-          name,
-          email,
-          phone,
-          role: isAdmin ? 'admin' : 'customer'
-        },
-        token: null
-      });
+      // If login fails, return error - user needs to login manually
+      return NextResponse.json({ error: "Account created but login failed. Please try logging in." }, { status: 500 });
     }
 
     return NextResponse.json({

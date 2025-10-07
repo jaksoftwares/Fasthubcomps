@@ -92,26 +92,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const register = async (name: string, email: string, password: string, isAdmin = false) => {
-    try {
-      const response = await AuthAPI.register({ name, email, password, isAdmin });
-      const loggedInUser: User = {
-        id: response.user.id,
-        email: response.user.email,
-        name: response.user.name,
-        role: response.user.role,
-      };
-      setUser(loggedInUser);
-      localStorage.setItem('fasthub-user', JSON.stringify(loggedInUser));
-
-      // Store token if registration returned one
-      if (response.token) {
-        localStorage.setItem('fasthub-token', response.token);
-      }
-
-      return true;
-    } catch {
-      return false;
+    const response = await AuthAPI.register({ name, email, password, isAdmin });
+    if (!response.token) {
+      throw new Error('Registration successful but login failed. Please try logging in.');
     }
+    const loggedInUser: User = {
+      id: response.user.id,
+      email: response.user.email,
+      name: response.user.name,
+      role: response.user.role,
+    };
+    setUser(loggedInUser);
+    localStorage.setItem('fasthub-user', JSON.stringify(loggedInUser));
+    localStorage.setItem('fasthub-token', response.token);
+    return true;
   };
 
   const logout = async () => {
