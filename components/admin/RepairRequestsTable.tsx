@@ -88,11 +88,16 @@ const RepairRequestsTable = () => {
     }
   };
 
-  const updateRequestStatus = (requestId: string, newStatus: string) => {
-    setRequests(requests.map(request => 
-      request.id === requestId ? { ...request, status: newStatus, updatedAt: new Date().toISOString() } : request
-    ));
-    toast.success('Repair request status updated successfully');
+  const updateRequestStatus = async (requestId: string, newStatus: string) => {
+    try {
+      await RepairsAPI.update(requestId, { status: newStatus });
+      setRequests(requests.map(request =>
+        request.id === requestId ? { ...request, status: newStatus, updated_at: new Date().toISOString() } : request
+      ));
+      toast.success('Repair request status updated successfully');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update status');
+    }
   };
 
   const formatCurrency = (amount: number) => {

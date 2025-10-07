@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Wrench, Clock, Shield, Star, CircleCheck as CheckCircle, Phone, Mail, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
+import { RepairsAPI } from '@/lib/services/repairs';
 
 const RepairsPage = () => {
   const [formData, setFormData] = useState({
@@ -91,20 +92,36 @@ const RepairsPage = () => {
     },
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would submit to your API
-    toast.success('Repair request submitted successfully! We\'ll contact you within 2 hours.');
-    setFormData({
-      customerName: '',
-      customerEmail: '',
-      customerPhone: '',
-      deviceType: '',
-      deviceBrand: '',
-      deviceModel: '',
-      issueDescription: '',
-      urgency: 'medium',
-    });
+
+    try {
+      const repairData = {
+        customer_name: formData.customerName,
+        customer_email: formData.customerEmail,
+        customer_phone: formData.customerPhone,
+        device_type: formData.deviceType,
+        device_brand: formData.deviceBrand,
+        device_model: formData.deviceModel,
+        issue_description: formData.issueDescription,
+        urgency: formData.urgency,
+      };
+
+      await RepairsAPI.create(repairData);
+      toast.success('Repair request submitted successfully! We\'ll contact you within 2 hours.');
+      setFormData({
+        customerName: '',
+        customerEmail: '',
+        customerPhone: '',
+        deviceType: '',
+        deviceBrand: '',
+        deviceModel: '',
+        issueDescription: '',
+        urgency: 'medium',
+      });
+    } catch (error: any) {
+      toast.error(error?.response?.data?.error || error.message || 'Failed to submit repair request. Please try again.');
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

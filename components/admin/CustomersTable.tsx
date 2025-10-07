@@ -52,9 +52,9 @@ const CustomersTable = () => {
   };
 
   const filteredCustomers = customers.filter(customer =>
-    customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.phone.includes(searchTerm)
+    customer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    customer.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    customer.phone?.includes(searchTerm)
   );
 
   // Helper to safely format price
@@ -102,7 +102,7 @@ const CustomersTable = () => {
             <div className="text-2xl font-bold text-blue-600">
               {formatPrice(
                 customers.reduce((sum, c) => {
-                  const spent = typeof c.totalSpent === 'number' && !isNaN(c.totalSpent) ? c.totalSpent : 0;
+                  const spent = typeof c.total_spent === 'number' && !isNaN(c.total_spent) ? c.total_spent : 0;
                   return sum + spent;
                 }, 0)
               )}
@@ -160,16 +160,16 @@ const CustomersTable = () => {
                       </div>
                     </td>
                     <td className="py-3 px-4">
-                      <div className="font-medium">{customer.totalOrders}</div>
-                      <div className="text-sm text-gray-600">Last: {customer.lastOrder}</div>
+                      <div className="font-medium">{customer.total_orders || 0}</div>
+                      <div className="text-sm text-gray-600">Last: {customer.last_order ? new Date(customer.last_order).toLocaleDateString() : 'Never'}</div>
                     </td>
-                    <td className="py-3 px-4 font-medium">{safeFormatPrice(customer.totalSpent)}</td>
+                    <td className="py-3 px-4 font-medium">{safeFormatPrice(customer.total_spent)}</td>
                     <td className="py-3 px-4">
                       <Badge className={getStatusColor(customer.status)}>
-                        {customer.status.toUpperCase()}
+                        {customer.status?.toUpperCase()}
                       </Badge>
                     </td>
-                    <td className="py-3 px-4 text-gray-600">{customer.joinDate}</td>
+                    <td className="py-3 px-4 text-gray-600">{customer.join_date ? new Date(customer.join_date).toLocaleDateString() : 'Unknown'}</td>
                     <td className="py-3 px-4">
                       <Button size="sm" variant="outline">
                         <Eye className="h-3 w-3 mr-1" />

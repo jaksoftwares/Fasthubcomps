@@ -33,6 +33,24 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Registration failed - no user created" }, { status: 500 });
     }
 
+    // Insert into customers table
+    const { error: insertError } = await supabase
+      .from('customers')
+      .insert([{
+        id: data.user.id,
+        name,
+        email: data.user.email,
+        password_hash: 'auth-managed', // Since password is managed by auth
+        phone,
+        status: data.session ? 'active' : 'pending'
+      }]);
+
+    if (insertError) {
+      // If insert fails, delete the auth user
+      await supabase.auth.admin.deleteUser(data.user.id);
+      return NextResponse.json({ error: 'Failed to create customer profile' }, { status: 500 });
+    }
+
     // Check if user is auto-confirmed (has session)
     if (data.session) {
       // User is confirmed, return token
