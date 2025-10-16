@@ -21,7 +21,7 @@ export async function GET(_: Request, { params }: { params: { repair_id: string 
 
   if (!data) return NextResponse.json({ error: "Repair not found" }, { status: 404 });
 
-  return NextResponse.json({ repair: data }, { status: 200 });
+  return NextResponse.json(data, { status: 200 });
 }
 
 // =======================================

@@ -5,25 +5,28 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { AnalyticsAPI } from '@/lib/services/analytics';
 
+interface SalesData {
+  month: string;
+  sales: number;
+}
+
 const SalesChart = () => {
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<SalesData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchSalesTrend = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const trend = await AnalyticsAPI.salesTrend();
-        setData(trend);
-      } catch (err: any) {
-        setError(err?.message || 'Failed to fetch sales trend');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchSalesTrend();
+    // Mock data for frontend testing
+    const mockData: SalesData[] = [
+      { month: 'Jan', sales: 12000 },
+      { month: 'Feb', sales: 15000 },
+      { month: 'Mar', sales: 18000 },
+      { month: 'Apr', sales: 22000 },
+      { month: 'May', sales: 25000 },
+      { month: 'Jun', sales: 28000 },
+    ];
+    setData(mockData);
+    setLoading(false);
   }, []);
 
   const formatCurrency = (value: number) => {

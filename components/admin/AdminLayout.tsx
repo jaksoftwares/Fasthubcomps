@@ -4,73 +4,102 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { LayoutDashboard, Package, ShoppingCart, Wrench, Users, Settings, ChartBar as BarChart3, Menu, X, LogOut, Chrome as Home } from 'lucide-react';
+import { 
+  LayoutDashboard, 
+  Package, 
+  ShoppingCart, 
+  Wrench, 
+  Users, 
+  Settings, 
+  ChartBar as BarChart3, 
+  Menu, 
+  X, 
+  LogOut, 
+  Chrome as Home,
+  Bell,
+  Search,
+  ChevronDown,
+  Sun,
+  Moon
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';
+import { Badge } from '@/components/ui/badge';
 
-interface AdminLayoutProps {
-  children: React.ReactNode;
-}
-
-const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
+const EnhancedAdminLayout = ({ children }: { children: React.ReactNode }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
-  const { logout } = useAuth();
 
   const handleLogout = async () => {
-    await logout();
     router.push('/');
   };
 
   const navigation = [
-    { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
-    { name: 'Products', href: '/admin/products', icon: Package },
-    { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
-    { name: 'Repairs', href: '/admin/repairs', icon: Wrench },
-    { name: 'Customers', href: '/admin/customers', icon: Users },
-    { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
-    { name: 'Settings', href: '/admin/settings', icon: Settings },
+    { name: 'Dashboard', href: '/admin', icon: LayoutDashboard, badge: null },
+    { name: 'Products', href: '/admin/products', icon: Package, badge: '12' },
+    { name: 'Orders', href: '/admin/orders', icon: ShoppingCart, badge: '45' },
+    { name: 'Repairs', href: '/admin/repairs', icon: Wrench, badge: '8' },
+    { name: 'Customers', href: '/admin/customers', icon: Users, badge: null },
+    { name: 'Analytics', href: '/admin/analytics', icon: BarChart3, badge: null },
+    { name: 'Settings', href: '/admin/settings', icon: Settings, badge: null },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black bg-opacity-60 z-40 lg:hidden backdrop-blur-sm transition-opacity duration-300"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+      <div className={`fixed inset-y-0 left-0 z-50 w-72 bg-gradient-to-b from-gray-900 via-blue-900 to-purple-900 shadow-2xl transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center justify-between p-4 border-b">
-            <Link href="/admin" className="flex items-center space-x-2">
-              <Image
-                src="/fasthub-logo.jpg"
-                alt="FastHub Admin"
-                width={120}
-                height={40}
-                className="h-8 w-auto"
-              />
+          <div className="flex items-center justify-between p-6 border-b border-white/10">
+            <Link href="/admin" className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
+                <Package className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-white">FastHub</h2>
+                <p className="text-xs text-blue-200">Admin Panel</p>
+              </div>
             </Link>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden"
+              className="lg:hidden text-white hover:bg-white/10"
             >
               <X className="h-5 w-5" />
             </Button>
           </div>
 
+          {/* User Profile Section */}
+          <div className="p-6 border-b border-white/10">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                AD
+              </div>
+              <div className="flex-1">
+                <p className="text-white font-semibold">Admin User</p>
+                <p className="text-blue-200 text-xs">admin@fasthub.com</p>
+              </div>
+              <ChevronDown className="h-4 w-4 text-blue-200" />
+            </div>
+          </div>
+
           {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-2">
+          <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+            <p className="text-xs font-semibold text-blue-300 uppercase tracking-wider px-3 mb-3">
+              Main Menu
+            </p>
             {navigation.map((item) => {
               const IconComponent = item.icon;
               const isActive = pathname === item.href;
@@ -79,24 +108,31 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`group flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
                     isActive
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-700 hover:bg-gray-100'
+                      ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/50'
+                      : 'text-blue-100 hover:bg-white/10 hover:text-white'
                   }`}
                   onClick={() => setSidebarOpen(false)}
                 >
-                  <IconComponent className="h-5 w-5" />
-                  <span>{item.name}</span>
+                  <div className="flex items-center space-x-3">
+                    <IconComponent className={`h-5 w-5 ${isActive ? 'text-white' : 'text-blue-300 group-hover:text-white'}`} />
+                    <span>{item.name}</span>
+                  </div>
+                  {item.badge && (
+                    <Badge className="bg-red-500 text-white border-0 text-xs px-2">
+                      {item.badge}
+                    </Badge>
+                  )}
                 </Link>
               );
             })}
           </nav>
 
           {/* Footer */}
-          <div className="p-4 border-t space-y-2">
+          <div className="p-4 border-t border-white/10 space-y-2">
             <Link href="/">
-              <Button variant="ghost" className="w-full justify-start">
+              <Button variant="ghost" className="w-full justify-start text-blue-100 hover:bg-white/10 hover:text-white">
                 <Home className="h-4 w-4 mr-3" />
                 Back to Store
               </Button>
@@ -104,7 +140,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             <Button
               variant="ghost"
               onClick={handleLogout}
-              className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+              className="w-full justify-start text-red-300 hover:text-red-200 hover:bg-red-500/20"
             >
               <LogOut className="h-4 w-4 mr-3" />
               Logout
@@ -114,21 +150,54 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       </div>
 
       {/* Main content */}
-      <div className="lg:ml-64">
+      <div className="lg:ml-72">
         {/* Top bar */}
-        <header className="bg-white shadow-sm border-b px-4 py-3">
-          <div className="flex items-center justify-between">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSidebarOpen(true)}
-              className="lg:hidden"
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-            
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">Admin Panel</span>
+        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-lg shadow-sm border-b border-gray-200">
+          <div className="px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSidebarOpen(true)}
+                  className="lg:hidden"
+                >
+                  <Menu className="h-5 w-5" />
+                </Button>
+                
+                {/* Search Bar */}
+                <div className="hidden md:flex items-center bg-gray-100 rounded-xl px-4 py-2 w-96">
+                  <Search className="h-4 w-4 text-gray-400 mr-2" />
+                  <input 
+                    type="text" 
+                    placeholder="Search products, orders, customers..." 
+                    className="bg-transparent outline-none text-sm text-gray-700 w-full"
+                  />
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-4">
+                {/* Dark Mode Toggle */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setDarkMode(!darkMode)}
+                  className="relative"
+                >
+                  {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+                </Button>
+
+                {/* Notifications */}
+                <Button variant="ghost" size="sm" className="relative">
+                  <Bell className="h-5 w-5" />
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                </Button>
+
+                {/* User Avatar */}
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-lg cursor-pointer hover:shadow-xl transition-shadow">
+                  AD
+                </div>
+              </div>
             </div>
           </div>
         </header>
@@ -137,9 +206,21 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         <main className="p-6">
           {children}
         </main>
+
+        {/* Footer */}
+        <footer className="bg-white/50 backdrop-blur-lg border-t border-gray-200 px-6 py-4 mt-12">
+          <div className="flex items-center justify-between text-sm text-gray-600">
+            <p>© 2024 FastHub Computers. All rights reserved.</p>
+            <div className="flex items-center space-x-4">
+              <Link href="#" className="hover:text-blue-600">Privacy</Link>
+              <Link href="#" className="hover:text-blue-600">Terms</Link>
+              <Link href="#" className="hover:text-blue-600">Support</Link>
+            </div>
+          </div>
+        </footer>
       </div>
     </div>
   );
 };
 
-export default AdminLayout;
+export default EnhancedAdminLayout;
