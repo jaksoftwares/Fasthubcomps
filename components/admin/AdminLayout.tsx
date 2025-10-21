@@ -152,7 +152,7 @@ const EnhancedAdminLayout = ({ children }: { children: React.ReactNode }) => {
       {/* Main content */}
       <div className="lg:ml-72">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-lg shadow-sm border-b border-gray-200">
+        <header className="sticky top-0 z-30 bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 shadow-2xl border-b border-white/10">
           <div className="px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
@@ -160,41 +160,41 @@ const EnhancedAdminLayout = ({ children }: { children: React.ReactNode }) => {
                   variant="ghost"
                   size="sm"
                   onClick={() => setSidebarOpen(true)}
-                  className="lg:hidden"
+                  className="lg:hidden text-white hover:bg-white/10"
                 >
                   <Menu className="h-5 w-5" />
                 </Button>
-                
+
                 {/* Search Bar */}
-                <div className="hidden md:flex items-center bg-gray-100 rounded-xl px-4 py-2 w-96">
-                  <Search className="h-4 w-4 text-gray-400 mr-2" />
-                  <input 
-                    type="text" 
-                    placeholder="Search products, orders, customers..." 
-                    className="bg-transparent outline-none text-sm text-gray-700 w-full"
+                <div className="hidden md:flex items-center bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2 w-96 border border-white/20">
+                  <Search className="h-4 w-4 text-blue-200 mr-2" />
+                  <input
+                    type="text"
+                    placeholder="Search products, orders, customers..."
+                    className="bg-transparent outline-none text-sm text-white placeholder-blue-200 w-full"
                   />
                 </div>
               </div>
-              
+
               <div className="flex items-center space-x-4">
                 {/* Dark Mode Toggle */}
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setDarkMode(!darkMode)}
-                  className="relative"
+                  className="relative text-white hover:bg-white/10"
                 >
                   {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
                 </Button>
 
                 {/* Notifications */}
-                <Button variant="ghost" size="sm" className="relative">
+                <Button variant="ghost" size="sm" className="relative text-white hover:bg-white/10">
                   <Bell className="h-5 w-5" />
                   <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
                 </Button>
 
                 {/* User Avatar */}
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-lg cursor-pointer hover:shadow-xl transition-shadow">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-white font-bold shadow-lg cursor-pointer hover:shadow-xl transition-shadow">
                   AD
                 </div>
               </div>
@@ -203,7 +203,7 @@ const EnhancedAdminLayout = ({ children }: { children: React.ReactNode }) => {
         </header>
 
         {/* Page content */}
-        <main className="p-6">
+        <main className='P-12'>
           {children}
         </main>
 
