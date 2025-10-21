@@ -143,7 +143,10 @@ const PerformanceMetrix = () => {
                     </div>
                     <Progress
                       value={metric.progress}
-                      className={cn("h-2", metric.changeType === 'increase' ? 'bg-green-100' : 'bg-red-100')}
+                      className={cn(
+                        "h-2",
+                        metric.changeType === 'increase' ? 'bg-green-100' : 'bg-red-100'
+                      )}
                     />
                   </div>
                 )}
