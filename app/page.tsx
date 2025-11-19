@@ -16,14 +16,11 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50">
       <Header />
       <main>
-        {/* Hero Carousel - Enhanced with auto-rotating slides */}
+        {/* Compact Hero Bar */}
         <HeroSection />
         
-        {/* Trust Badges & Brand Partners - NEW SECTION */}
-        <TrustBadges />
-        
-        {/* Shop by Category - Enhanced with better visuals */}
-        <Categories />
+        {/* Best Deals - Limited time offers - PROMINENT */}
+        <BestDeals />
         
         {/* Featured Products - Enhanced with wishlist & quick view */}
         <FeaturedProducts />
@@ -31,16 +28,19 @@ export default function Home() {
         {/* Top Sales - Best selling products */}
         <TopSales />
         
-        {/* Best Deals - Limited time offers */}
-        <BestDeals />
+        {/* Shop by Category - Enhanced with better visuals */}
+        <Categories />
         
-        {/* Why Choose Us - NEW SECTION */}
-        <WhyChooseUs />
+        {/* Trust Badges & Brand Partners - MOVED DOWN */}
+        <TrustBadges />
         
-        {/* Services - Repair and support services */}
+        {/* Services - Repair and support services - MOVED DOWN */}
         <Services />
         
-        {/* Customer Testimonials - NEW SECTION */}
+        {/* Why Choose Us - MOVED DOWN */}
+        <WhyChooseUs />
+        
+        {/* Customer Testimonials - MOVED DOWN */}
         <Testimonials />
         
         {/* Newsletter Subscription */}

@@ -35,7 +35,7 @@ const TopSales = () => {
                 reviews: p.reviews || 0,
               }))
               .sort((a, b) => (b.salesCount || 0) - (a.salesCount || 0))
-              .slice(0, 8)
+              .slice(0, 18) // Show 18 products for 6x3 grid
           : [];
         setTopSalesProducts(topSales);
       } catch (err: any) {
@@ -67,124 +67,123 @@ const TopSales = () => {
 
   if (loading) {
     return (
-      <section className="py-20 bg-gradient-to-b from-gray-50 to-gray-100">
-        <div className="text-center text-gray-600">Loading top sales...</div>
+      <section className="py-8 bg-gradient-to-b from-gray-50 to-gray-100">
+        <div className="text-center text-gray-600 text-sm">Loading top sales...</div>
       </section>
     );
   }
 
   if (error) {
     return (
-      <section className="py-20 bg-gradient-to-b from-gray-50 to-gray-100">
-        <div className="text-center text-red-500">{error}</div>
+      <section className="py-8 bg-gradient-to-b from-gray-50 to-gray-100">
+        <div className="text-center text-red-500 text-sm">{error}</div>
       </section>
     );
   }
 
   return (
-    <section className="py-20 bg-gradient-to-b from-gray-50 to-gray-100">
+    <section className="py-8 bg-gradient-to-b from-gray-50 to-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm font-semibold mb-4">
-            <TrendingUp className="h-4 w-4 mr-2" />
-            TOP SELLING PRODUCTS
+        {/* Header with Background - Left Aligned */}
+        <div className="mb-8">
+          <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-4 rounded-lg shadow-lg">
+            <h2 className="text-3xl font-bold text-white">
+              Top Sales
+            </h2>
           </div>
-          <h2 className="text-4xl font-bold text-gray-900 mb-3">Top Sales</h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Our most popular and best-performing products trusted by customers across Kenya.
-          </p>
         </div>
 
-        {/* Scrollable Product Row */}
-        <div className="relative">
-          <div className="flex gap-6 overflow-x-auto pb-6 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-            {topSalesProducts.map((product) => (
-              <div
+        {/* Compact Product Grid - 6 columns on desktop, 2-3 on mobile */}
+        {loading ? (
+          <div className="text-center py-4 text-gray-600 text-sm">Loading...</div>
+        ) : error ? (
+          <div className="text-center text-red-500 py-4 text-sm">{error}</div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+            {topSalesProducts.map((product, index) => (
+              <Card
                 key={product.id}
-                className="flex-shrink-0 w-72 snap-center"
+                className="group border-0 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden rounded-xl bg-white"
               >
-                <Card className="group border-0 shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden rounded-2xl">
-                  <CardContent className="p-0">
-                    {/* Image */}
-                    <Link href={`/products/${product.slug}`}>
-                      <div className="relative h-52 bg-gray-100 overflow-hidden cursor-pointer">
-                        <Image
-                          src={product.image}
-                          alt={product.name}
-                          fill
-                          className="object-cover group-hover:scale-110 transition-transform duration-500"
-                        />
-                        <Badge className="absolute top-3 left-3 bg-green-600 text-white shadow-md">
-                          {product.salesCount} Sold
-                        </Badge>
-                      </div>
-                    </Link>
-
-                    {/* Info */}
-                    <div className="p-5">
-                      <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
-                        <Link
-                          href={`/products/${product.slug}`}
-                          className="hover:text-green-600 transition-colors"
-                        >
-                          {product.name}
-                        </Link>
-                      </h3>
-
-                      {/* Rating */}
-                      <div className="flex items-center mb-3">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`h-4 w-4 ${
-                              i < Math.floor(product.rating)
-                                ? 'text-yellow-400 fill-current'
-                                : 'text-gray-300'
-                            }`}
-                          />
-                        ))}
-                        <span className="text-sm text-gray-600 ml-2">
-                          ({product.reviews})
-                        </span>
-                      </div>
-
-                      {/* Price */}
-                      <div className="mb-4">
-                        <span className="text-2xl font-bold text-gray-900">
-                          {formatPrice(product.price)}
-                        </span>
-                        {product.originalPrice > product.price && (
-                          <span className="text-sm text-gray-500 line-through ml-2">
-                            {formatPrice(product.originalPrice)}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Add to Cart */}
-                      <Button
-                        onClick={() => handleAddToCart(product)}
-                        className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-5 rounded-lg transition-all transform hover:scale-105"
-                      >
-                        <ShoppingCart className="h-4 w-4 mr-2" />
-                        Add to Cart
-                      </Button>
+                <CardContent className="p-2">
+                  {/* Compact Image */}
+                  <Link href={`/products/${product.slug}`}>
+                    <div className="relative h-32 overflow-hidden cursor-pointer">
+                      <Image
+                        src={product.image}
+                        alt={product.name}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <Badge className="absolute top-1 left-1 bg-green-600 text-white text-xs px-1.5 py-0.5 rounded flex items-center">
+                        <TrendingUp className="h-2.5 w-2.5 mr-0.5" />
+                        {product.salesCount}
+                      </Badge>
                     </div>
-                  </CardContent>
-                </Card>
-              </div>
+                  </Link>
+
+                  {/* Compact Info */}
+                  <div className="p-2">
+                    <h3 className="font-medium text-gray-900 mb-1 line-clamp-2 text-xs leading-tight">
+                      <Link
+                        href={`/products/${product.slug}`}
+                        className="hover:text-green-600 transition-colors"
+                      >
+                        {product.name}
+                      </Link>
+                    </h3>
+
+                    {/* Compact Rating */}
+                    <div className="flex items-center mb-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`h-2.5 w-2.5 ${
+                            i < Math.floor(product.rating)
+                              ? 'text-yellow-400 fill-current'
+                              : 'text-gray-300'
+                          }`}
+                        />
+                      ))}
+                      <span className="text-xs text-gray-600 ml-1">
+                        {product.rating}
+                      </span>
+                    </div>
+
+                    {/* Compact Price */}
+                    <div className="mb-2">
+                      <span className="text-sm font-bold text-gray-900">
+                        {formatPrice(product.price)}
+                      </span>
+                      {product.originalPrice > product.price && (
+                        <span className="text-xs text-gray-500 line-through ml-1">
+                          {formatPrice(product.originalPrice)}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Compact Add to Cart */}
+                    <Button
+                      onClick={() => handleAddToCart(product)}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 text-xs rounded-lg transition-all transform hover:scale-105"
+                    >
+                      <ShoppingCart className="h-3 w-3 mr-1" />
+                      Add to Cart
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
-        </div>
+        )}
 
-        {/* View All */}
-        <div className="text-center mt-10">
+        {/* Compact View All */}
+        <div className="text-center mt-6">
           <Link href="/products">
             <Button
-              size="lg"
-              variant="outline"
-              className="px-12 py-6 text-lg border-2 border-green-600 text-green-700 hover:bg-green-600 hover:text-white transition-all"
+              className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 text-sm font-semibold rounded-lg"
             >
+              <TrendingUp className="h-4 w-4 mr-2" />
               View All Top Sales
             </Button>
           </Link>

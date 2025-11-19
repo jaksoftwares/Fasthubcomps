@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Star, ShoppingCart, Zap, Clock } from 'lucide-react';
+import { Star, ShoppingCart, Zap, Timer } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { ProductsAPI } from '@/lib/services/products';
 import { motion } from 'framer-motion';
@@ -30,12 +30,12 @@ const BestDeals = () => {
                 ...p,
                 discount: Math.round(((p.original_price - p.price) / p.original_price) * 100),
                 image: Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : '/placeholder.png',
-                timeLeft: 'Ends soon!',
+                timeLeft: 'Limited',
                 rating: p.rating || 4.5,
                 reviews: p.reviews || 0,
               }))
               .sort((a, b) => b.discount - a.discount)
-              .slice(0, 4)
+              .slice(0, 18) // Show 18 products for 6x3 grid
           : [];
         setBestDeals(deals);
       } catch (err: any) {
@@ -65,110 +65,99 @@ const BestDeals = () => {
   };
 
   return (
-    <section className="relative py-20 bg-gradient-to-br from-[#fff5ef] via-[#fff1e5] to-[#ffe5d2] overflow-hidden">
-      {/* Background accents */}
-      <div className="absolute inset-0 opacity-30 bg-[url('/patterns/sales-bg.svg')] bg-cover bg-center mix-blend-overlay"></div>
-
+    <section className="relative py-8 bg-gradient-to-br from-[#fff5ef] via-[#fff1e5] to-[#ffe5d2] overflow-hidden">
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center bg-orange-100 text-orange-700 px-4 py-2 rounded-full text-sm font-semibold mb-4">
-            <Zap className="h-4 w-4 mr-2" />
-            HOT DEALS OF THE WEEK
-          </div>
-          <h2 className="text-4xl font-bold text-gray-900 mb-3">
-            <span className="bg-gradient-to-r from-orange-600 to-red-500 text-transparent bg-clip-text">
+        {/* Header with Background - Left Aligned */}
+        <div className="mb-8">
+          <div className="bg-gradient-to-r from-red-600 to-orange-600 text-white px-6 py-4 rounded-lg shadow-lg">
+            <h2 className="text-3xl font-bold text-white">
               Best Deals
-            </span>
-          </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Limited-time offers you can’t resist — big savings on trending products.
-          </p>
+            </h2>
+          </div>
         </div>
 
-        {/* Product Grid */}
+        {/* Compact Product Grid - 6 columns on desktop, 2-3 on mobile */}
         {loading ? (
-          <div className="text-center py-8 text-gray-600">Loading best deals...</div>
+          <div className="text-center py-8 text-gray-600">Loading deals...</div>
         ) : error ? (
           <div className="text-center text-red-500 py-8">{error}</div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
             {bestDeals.map((product, index) => (
               <motion.div
                 key={product.id}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: index * 0.1 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
                 viewport={{ once: true }}
               >
-                <Card className="group border-0 shadow-md hover:shadow-2xl transition-all duration-300 rounded-2xl overflow-hidden bg-white">
-                  <CardContent className="p-0">
-                    {/* Product Image */}
+                <Card className="group border-0 shadow-sm hover:shadow-lg transition-all duration-300 rounded-xl overflow-hidden bg-white">
+                  <CardContent className="p-2">
+                    {/* Compact Product Image */}
                     <Link href={`/products/${product.slug}`} className="block">
-                      <div className="relative h-56 overflow-hidden">
+                      <div className="relative h-32 overflow-hidden">
                         <Image
                           src={product.image}
                           alt={product.name}
                           fill
-                          className="object-cover group-hover:scale-110 transition-transform duration-500"
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
                         />
-                        {/* Discount badge */}
-                        <Badge className="absolute top-3 left-3 bg-red-600 text-white text-xs px-3 py-1.5 rounded-full shadow-md">
+                        {/* Compact discount badge */}
+                        <Badge className="absolute top-1 left-1 bg-red-600 text-white text-xs px-1.5 py-0.5 rounded">
                           -{product.discount}%
                         </Badge>
                         {/* Timer badge */}
-                        <div className="absolute top-3 right-3 bg-orange-600 text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center shadow-md">
-                          <Clock className="h-3.5 w-3.5 mr-1" />
-                          {product.timeLeft}
+                        <div className="absolute top-1 right-1 bg-orange-600 text-white px-1.5 py-0.5 rounded text-xs font-medium flex items-center">
+                          <Timer className="h-2.5 w-2.5 mr-0.5" />
                         </div>
                       </div>
                     </Link>
 
-                    {/* Details */}
-                    <div className="p-5">
-                      <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 text-lg">
+                    {/* Compact Details */}
+                    <div className="p-2">
+                      <h3 className="font-medium text-gray-900 mb-1 line-clamp-2 text-xs leading-tight">
                         <Link href={`/products/${product.slug}`} className="hover:text-orange-600 transition-colors">
                           {product.name}
                         </Link>
                       </h3>
 
-                      {/* Rating */}
-                      <div className="flex items-center mb-2">
+                      {/* Compact Rating */}
+                      <div className="flex items-center mb-1">
                         {[...Array(5)].map((_, i) => (
                           <Star
                             key={i}
-                            className={`h-4 w-4 ${
+                            className={`h-2.5 w-2.5 ${
                               i < Math.floor(product.rating)
                                 ? 'text-yellow-400 fill-current'
                                 : 'text-gray-300'
                             }`}
                           />
                         ))}
-                        <span className="text-sm text-gray-600 ml-2">({product.reviews})</span>
+                        <span className="text-xs text-gray-500 ml-1">({product.reviews})</span>
                       </div>
 
-                      {/* Prices */}
-                      <div className="mb-4">
-                        <div className="flex items-center space-x-2">
-                          <span className="text-2xl font-bold text-red-600">
+                      {/* Compact Prices */}
+                      <div className="mb-2">
+                        <div className="flex items-center space-x-1">
+                          <span className="text-sm font-bold text-red-600">
                             {formatPrice(product.price)}
                           </span>
-                          <span className="text-sm text-gray-500 line-through">
+                          <span className="text-xs text-gray-500 line-through">
                             {formatPrice(product.original_price)}
                           </span>
                         </div>
-                        <div className="text-sm text-green-600 font-medium">
+                        <div className="text-xs text-green-600 font-medium">
                           Save {formatPrice(product.original_price - product.price)}
                         </div>
                       </div>
 
-                      {/* CTA */}
+                      {/* Compact CTA */}
                       <Button
                         onClick={() => handleAddToCart(product)}
-                        className="w-full bg-gradient-to-r from-orange-600 to-red-500 hover:from-orange-700 hover:to-red-600 text-white font-semibold py-5 rounded-lg transition-all transform hover:scale-105"
+                        className="w-full bg-gradient-to-r from-orange-600 to-red-500 hover:from-orange-700 hover:to-red-600 text-white font-medium py-2 text-xs rounded-lg transition-all transform hover:scale-105"
                       >
-                        <ShoppingCart className="h-4 w-4 mr-2" />
-                        Grab This Deal
+                        <ShoppingCart className="h-3 w-3 mr-1" />
+                        Buy Now
                       </Button>
                     </div>
                   </CardContent>
@@ -177,6 +166,18 @@ const BestDeals = () => {
             ))}
           </div>
         )}
+
+        {/* Compact View All CTA */}
+        <div className="text-center mt-6">
+          <Link href="/products?deals=true">
+            <Button 
+              className="bg-gradient-to-r from-gray-800 to-gray-700 hover:from-gray-900 hover:to-gray-800 text-white px-6 py-2 text-sm font-semibold rounded-lg"
+            >
+              <Zap className="h-4 w-4 mr-2" />
+              View All Deals
+            </Button>
+          </Link>
+        </div>
       </div>
     </section>
   );
