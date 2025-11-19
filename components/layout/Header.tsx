@@ -38,6 +38,14 @@ const Header = () => {
     { text: 'Professional Repair Services', link: '/repairs' },
   ];
 
+  // Background images for the top bar
+  const backgroundImages = [
+    'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=2000&q=80',
+    'https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&w=2000&q=80',
+    'https://images.unsplash.com/photo-1593642532842-98d0fd5ebc1a?auto=format&fit=crop&w=2000&q=80',
+    'https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?auto=format&fit=crop&w=2000&q=80',
+  ];
+
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % promoSlides.length);
@@ -272,8 +280,18 @@ const Header = () => {
   return (
     <>
       {/* Top Promo Bar with Contact Info */}
-      <div className="bg-gradient-to-r from-orange-600 via-orange-500 to-orange-600 text-white py-2 px-4">
-        <div className="max-w-7xl mx-auto flex justify-between items-center text-sm">
+      <div className="relative bg-gray-900 text-white py-2 px-4 overflow-hidden">
+        {/* Rotating Background Image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center transition-all duration-1000 opacity-50"
+          style={{
+            backgroundImage: `url('${backgroundImages[currentSlide]}')`
+          }}
+        />
+        {/* Dark Overlay */}
+        <div className="absolute inset-0 bg-black/60" />
+        
+        <div className="relative z-10 max-w-7xl mx-auto flex justify-between items-center text-sm">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-1">
               <Phone className="h-4 w-4" />
@@ -287,19 +305,19 @@ const Header = () => {
           
           {/* Rotating Promo Messages */}
           <div className="flex-1 flex justify-center items-center space-x-2">
-            <Zap className="h-4 w-4 animate-pulse" />
+            <Zap className="h-4 w-4 animate-pulse text-yellow-300" />
             <Link href={promoSlides[currentSlide].link} className="hover:underline font-semibold">
               {promoSlides[currentSlide].text}
             </Link>
-            <Zap className="h-4 w-4 animate-pulse" />
+            <Zap className="h-4 w-4 animate-pulse text-yellow-300" />
           </div>
           
           <div className="hidden lg:flex items-center space-x-2">
             <span className="text-xs">Follow Us:</span>
             <div className="flex space-x-2">
-              <a href="#" className="hover:text-orange-200 transition-colors">FB</a>
-              <a href="#" className="hover:text-orange-200 transition-colors">TW</a>
-              <a href="#" className="hover:text-orange-200 transition-colors">IG</a>
+              <a href="#" className="hover:text-blue-200 transition-colors">FB</a>
+              <a href="#" className="hover:text-blue-200 transition-colors">TW</a>
+              <a href="#" className="hover:text-blue-200 transition-colors">IG</a>
             </div>
           </div>
         </div>
@@ -335,6 +353,10 @@ const Header = () => {
                   height={40}
                   className="h-10 w-auto"
                 />
+                <div className="hidden sm:flex flex-col leading-tight">
+                  <span className="text-xl font-bold text-orange-600">FastHub</span>
+                  <span className="text-xs font-semibold text-blue-600 uppercase tracking-wide">Computers</span>
+                </div>
               </Link>
             </div>
 
