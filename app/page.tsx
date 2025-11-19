@@ -1,6 +1,6 @@
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import HeroSection from '@/components/home/HeroSection';
+import Breadcrumb from '@/components/layout/Breadcrumb';
 import FeaturedProducts from '@/components/home/FeaturedProducts';
 import Categories from '@/components/home/Categories';
 import TopSales from '@/components/home/TopSales';
@@ -15,10 +15,8 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
+      <Breadcrumb />
       <main>
-        {/* Compact Hero Bar */}
-        <HeroSection />
-        
         {/* Best Deals - Limited time offers - PROMINENT */}
         <BestDeals />
         
