@@ -10,34 +10,36 @@ import { Slider } from '@/components/ui/slider';
 import { Star } from 'lucide-react';
 
 interface Filters {
+  search: string;
   category: string;
   priceRange: number[];
   brand: string;
   rating: number;
   sortBy: string;
+  tags: string[];
 }
 
 interface ProductFiltersProps {
   filters: Filters;
-  onFiltersChange: (filters: Filters) => void;
+  onFiltersChange: (filters: Partial<Filters>) => void;
 }
 
 const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onFiltersChange }) => {
   const categories = [
     { value: '', label: 'All Categories' },
-    { value: 'computers', label: 'Computers' },
-    { value: 'laptops', label: 'Laptops' },
-    { value: 'phones', label: 'Phones' },
+    { value: 'laptops', label: 'Laptops & Notebooks' },
+    { value: 'desktops', label: 'Desktop Computers' },
+    { value: 'components', label: 'Computer Components' },
     { value: 'accessories', label: 'Accessories' },
+    { value: 'tablets', label: 'Tablets & eReaders' },
+    { value: 'software', label: 'Software' },
   ];
 
   const productTags = [
-    { value: '', label: 'All Products' },
-    { value: 'featured', label: 'Featured' },
-    { value: 'top_sales', label: 'Top Sales' },
-    { value: 'best_deals', label: 'Best Deals' },
+    { value: 'featured', label: 'Featured Products' },
+    { value: 'bestseller', label: 'Best Sellers' },
     { value: 'new', label: 'New Arrivals' },
-    { value: 'popular', label: 'Popular' },
+    { value: 'on-sale', label: 'On Sale' },
   ];
 
   const brands = [
@@ -46,7 +48,12 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onFiltersChang
     { value: 'Samsung', label: 'Samsung' },
     { value: 'Dell', label: 'Dell' },
     { value: 'HP', label: 'HP' },
+    { value: 'Lenovo', label: 'Lenovo' },
+    { value: 'Asus', label: 'Asus' },
+    { value: 'Acer', label: 'Acer' },
+    { value: 'MSI', label: 'MSI' },
     { value: 'Logitech', label: 'Logitech' },
+    { value: 'Razer', label: 'Razer' },
   ];
 
   const sortOptions = [
@@ -71,44 +78,27 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onFiltersChang
     });
   };
 
+  const handleTagChange = (tag: string, checked: boolean) => {
+    const newTags = checked
+      ? [...filters.tags, tag]
+      : filters.tags.filter(t => t !== tag);
+    handleFilterChange('tags', newTags);
+  };
+
   const clearFilters = () => {
     onFiltersChange({
-      category: '',
+      search: '',
+      category: 'all',
       priceRange: [0, 500000],
-      brand: '',
+      brand: 'all',
       rating: 0,
       sortBy: 'name',
+      tags: [],
     });
   };
 
   return (
     <div className="space-y-6">
-      {/* Sort */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Sort By</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Select
-            value={filters.sortBy}
-            onValueChange={(value) => handleFilterChange('sortBy', value)}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {sortOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </CardContent>
-      </Card>
-
-      {/* Product Tags (removed, not in Filters interface) */}
-
       {/* Category */}
       <Card>
         <CardHeader>
@@ -119,13 +109,34 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onFiltersChang
             <div key={category.value} className="flex items-center space-x-2">
               <Checkbox
                 id={`category-${category.value}`}
-                checked={filters.category === category.value}
+                checked={filters.category === category.value || (category.value === 'all' && filters.category === 'all')}
                 onCheckedChange={(checked) => 
-                  handleFilterChange('category', checked ? category.value : '')
+                  handleFilterChange('category', checked ? category.value : 'all')
                 }
               />
               <Label htmlFor={`category-${category.value}`} className="text-sm">
                 {category.label}
+              </Label>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      {/* Product Tags */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Product Type</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {productTags.map((tag) => (
+            <div key={tag.value} className="flex items-center space-x-2">
+              <Checkbox
+                id={`tag-${tag.value}`}
+                checked={filters.tags.includes(tag.value)}
+                onCheckedChange={(checked) => handleTagChange(tag.value, checked as boolean)}
+              />
+              <Label htmlFor={`tag-${tag.value}`} className="text-sm">
+                {tag.label}
               </Label>
             </div>
           ))}
@@ -165,9 +176,9 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({ filters, onFiltersChang
             <div key={brand.value} className="flex items-center space-x-2">
               <Checkbox
                 id={`brand-${brand.value}`}
-                checked={filters.brand === brand.value}
+                checked={filters.brand === brand.value || (brand.value === 'all' && filters.brand === 'all')}
                 onCheckedChange={(checked) => 
-                  handleFilterChange('brand', checked ? brand.value : '')
+                  handleFilterChange('brand', checked ? brand.value : 'all')
                 }
               />
               <Label htmlFor={`brand-${brand.value}`} className="text-sm">

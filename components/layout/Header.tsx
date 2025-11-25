@@ -23,12 +23,23 @@ const Header = () => {
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [buttonPosition, setButtonPosition] = useState({ top: 0, left: 0, width: 0 });
+  const [isClickOpened, setIsClickOpened] = useState(false);
+  const [closeTimer, setCloseTimer] = useState<NodeJS.Timeout | null>(null);
   const categoryButtonRef = useRef<HTMLButtonElement>(null);
   
   const { state: cartState } = useCart();
   const { state: wishlistState } = useWishlist();
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
   const { user, logout } = useAuth();
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (closeTimer) {
+        clearTimeout(closeTimer);
+      }
+    };
+  }, [closeTimer]);
 
   // Promo slides for the top bar
   const promoSlides = [
@@ -53,17 +64,110 @@ const Header = () => {
     return () => clearInterval(timer);
   }, [promoSlides.length]);
 
+  // Clear close timer when menu opens
+  useEffect(() => {
+    if (isCategoryMenuOpen) {
+      if (closeTimer) {
+        clearTimeout(closeTimer);
+        setCloseTimer(null);
+      }
+    }
+  }, [isCategoryMenuOpen, closeTimer]);
+
   // Update button position when menu opens
   useEffect(() => {
     if (isCategoryMenuOpen && categoryButtonRef.current) {
       const rect = categoryButtonRef.current.getBoundingClientRect();
       setButtonPosition({
-        top: rect.bottom + window.scrollY,
-        left: rect.left + window.scrollX,
+        top: rect.bottom, // Use viewport coordinates, not document coordinates
+        left: rect.left, // Use viewport coordinates, not document coordinates  
         width: rect.width,
       });
     }
   }, [isCategoryMenuOpen]);
+
+  // Update position when window scrolls to keep modal aligned
+  useEffect(() => {
+    const handleScroll = () => {
+      if (isCategoryMenuOpen && categoryButtonRef.current) {
+        const rect = categoryButtonRef.current.getBoundingClientRect();
+        
+        // Close modal if button is too far from viewport (more than 200px away)
+        if (rect.bottom < -200 || rect.top > window.innerHeight + 200) {
+          setIsCategoryMenuOpen(false);
+          setIsClickOpened(false);
+          return;
+        }
+        
+        setButtonPosition({
+          top: rect.bottom, // Keep using viewport coordinates
+          left: rect.left, // Keep using viewport coordinates
+          width: rect.width,
+        });
+      }
+    };
+
+    if (isCategoryMenuOpen) {
+      window.addEventListener('scroll', handleScroll, { passive: true });
+      return () => window.removeEventListener('scroll', handleScroll);
+    }
+  }, [isCategoryMenuOpen]);
+
+  // Handle click to toggle menu
+  const handleCategoryButtonClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (isCategoryMenuOpen) {
+      setIsCategoryMenuOpen(false);
+      setIsClickOpened(false);
+    } else {
+      setIsCategoryMenuOpen(true);
+      setIsClickOpened(true);
+    }
+  };
+
+  // Handle mouse enter
+  const handleMouseEnter = () => {
+    if (closeTimer) {
+      clearTimeout(closeTimer);
+      setCloseTimer(null);
+    }
+    setIsCategoryMenuOpen(true);
+  };
+
+  // Handle mouse leave with delay
+  const handleMouseLeave = () => {
+    if (isClickOpened) {
+      // If opened by click, delay closing to allow navigation
+      const timer = setTimeout(() => {
+        setIsCategoryMenuOpen(false);
+        setIsClickOpened(false);
+      }, 1000); // 1 second delay
+      setCloseTimer(timer);
+    } else {
+      // If opened by hover, close immediately
+      setIsCategoryMenuOpen(false);
+    }
+  };
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isCategoryMenuOpen && categoryButtonRef.current) {
+        const target = event.target as Element;
+        if (!categoryButtonRef.current.contains(target)) {
+          setIsCategoryMenuOpen(false);
+          setIsClickOpened(false);
+        }
+      }
+    };
+
+    if (isCategoryMenuOpen && isClickOpened) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [isCategoryMenuOpen, isClickOpened]);
 
   // Comprehensive category menu with detailed brands/subcategories
   const categoryMenu = [
@@ -326,42 +430,43 @@ const Header = () => {
       {/* Main Header */}
       <header className="bg-white shadow-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-20">
             {/* Toggle Menu Button & Logo */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 py-2">
               {/* Category Menu Toggle Button */}
-              <Link href="/products">
-                <Button
-                  ref={categoryButtonRef}
-                  variant="outline"
-                  size="sm"
-                  onMouseEnter={() => setIsCategoryMenuOpen(true)}
-                  onMouseLeave={() => setIsCategoryMenuOpen(false)}
-                  className="flex items-center space-x-2 border-2 border-orange-500 text-orange-600 hover:bg-orange-50"
-                >
-                  <Menu className="h-5 w-5" />
-                  <span className="hidden sm:inline font-semibold">Categories</span>
-                </Button>
-              </Link>
+              <Button
+                ref={categoryButtonRef}
+                variant="outline"
+                size="sm"
+                onClick={handleCategoryButtonClick}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+                className={`flex items-center space-x-2 border-2 border-orange-500 text-orange-600 hover:bg-orange-50 ${
+                  isCategoryMenuOpen ? 'bg-orange-50' : ''
+                }`}
+              >
+                <Menu className="h-5 w-5" />
+                <span className="hidden sm:inline font-semibold">Categories</span>
+              </Button>
 
               {/* Logo */}
-              <Link href="/" className="flex items-center space-x-2">
+              <Link href="/" className="flex items-center space-x-3">
                 <Image
                   src="/fasthub-logo.jpg"
                   alt="FastHub Computers"
-                  width={120}
-                  height={40}
-                  className="h-10 w-auto"
+                  width={160}
+                  height={60}
+                  className="h-14 w-auto"
                 />
                 <div className="hidden sm:flex flex-col leading-tight">
-                  <span className="text-xl font-bold text-orange-600">FastHub</span>
-                  <span className="text-xs font-semibold text-blue-600 uppercase tracking-wide">Computers</span>
+                  <span className="text-2xl font-bold text-orange-600">FastHub</span>
+                  <span className="text-sm font-semibold text-blue-600 uppercase tracking-wide">Computers</span>
                 </div>
               </Link>
             </div>
 
             {/* Search Bar */}
-            <div className="hidden md:flex flex-1 max-w-lg mx-8">
+            <div className="hidden md:flex flex-1 max-w-lg mx-8 py-2">
               <div className="relative w-full">
                 <Input
                   type="text"
@@ -375,7 +480,7 @@ const Header = () => {
             </div>
 
             {/* Right Side Actions */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 py-2">
               {/* User Account */}
               <div className="relative">
                 {user ? (
@@ -472,8 +577,8 @@ const Header = () => {
               left: `${buttonPosition.left}px`,
               minWidth: '280px',
             }}
-            onMouseEnter={() => setIsCategoryMenuOpen(true)}
-            onMouseLeave={() => setIsCategoryMenuOpen(false)}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
           >
             {/* Pointer Arrow */}
             <div 
@@ -574,7 +679,10 @@ const Header = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setIsCategoryMenuOpen(false)}
+                  onClick={() => {
+                    setIsCategoryMenuOpen(false);
+                    setIsClickOpened(false);
+                  }}
                   className="text-white hover:bg-orange-700 h-6 w-6 p-0"
                 >
                   <X className="h-4 w-4" />
