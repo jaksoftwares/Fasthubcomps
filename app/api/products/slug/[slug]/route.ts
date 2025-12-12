@@ -6,12 +6,16 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-export async function GET(_: Request, { params }: { params: { slug: string } }) {
+export async function GET(
+  _req: Request,
+  context: { params: Promise<{ slug: string }> }
+) {
   try {
+    const { slug } = await context.params;
     const { data, error } = await supabase
       .from("products")
       .select("*")
-      .eq("slug", params.slug)
+      .eq("slug", slug)
       .single();
     if (error) throw error;
 

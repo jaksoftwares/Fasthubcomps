@@ -18,7 +18,9 @@ import { useWishlist } from '@/contexts/WishlistContext';
 
 const ProductDetailPage = () => {
 	const params = useParams();
-	const slug = Array.isArray(params.slug) ? params.slug[0] : params.slug;
+	// Ensure slug is treated as a string for TypeScript while still handling array params
+	const rawSlug = (params as any).slug;
+	const slug = (Array.isArray(rawSlug) ? rawSlug[0] : rawSlug) as string;
 	const { addItem } = useCart();
 	const { state: wishlistState, addWishlistItem, removeWishlistItem } = useWishlist();
 	const [selectedImage, setSelectedImage] = useState(0);
@@ -26,6 +28,7 @@ const ProductDetailPage = () => {
 	const [product, setProduct] = useState<any>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [categories, setCategories] = useState<any[]>([]);
 
 	React.useEffect(() => {
 		const fetchProduct = async () => {
@@ -42,6 +45,19 @@ const ProductDetailPage = () => {
 		};
 		if (slug) fetchProduct();
 	}, [slug]);
+
+	React.useEffect(() => {
+		const fetchCategories = async () => {
+			try {
+				const res = await fetch('/api/categories');
+				const data = await res.json();
+				setCategories(Array.isArray(data) ? data : []);
+			} catch {
+				// fail silently; breadcrumb will fall back to raw id
+			}
+		};
+		fetchCategories();
+	}, []);
 
 	if (loading) {
 		return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
@@ -113,21 +129,26 @@ const ProductDetailPage = () => {
 		}
 	};
 
-	const discountPercentage = product.originalPrice 
-		? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+	const discountPercentage = product.old_price 
+		? Math.round(((product.old_price - product.price) / product.old_price) * 100)
 		: 0;
 
-	const features: string[] = Array.isArray(product.features)
-		? product.features
-		: typeof product.features === 'string' && product.features
-			? [product.features]
-			: [];
+	// Normalize some DB-backed fields for display
+	const categoryId = product.category_id || product.category || 'Category';
+	let categoryName = 'Category';
+	if (categoryId) {
+		const match = categories.find((c) => c.id === categoryId);
+		categoryName = match?.name || categoryId;
+	}
+	const model = product.model || '';
+	const tags: string[] = Array.isArray(product.tags) ? product.tags : [];
+	const flags: string[] = Array.isArray(product.flags) ? product.flags : [];
 
 	// Generate breadcrumb items
 	const breadcrumbItems = [
 		{ label: 'Home', href: '/' },
 		{ label: 'Products', href: '/products' },
-		{ label: product.category || 'Category', href: `/products?category=${product.category}` },
+		{ label: categoryName, href: `/products?category=${categoryId}` },
 		{ label: product.name, href: `/products/${product.slug}` },
 	];
 
@@ -185,8 +206,6 @@ const ProductDetailPage = () => {
 						<div>
 							<div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
 								<span className="uppercase">{product.brand}</span>
-								<span>•</span>
-								<span>SKU: {product.sku}</span>
 							</div>
 							<h1 className="text-xl font-bold text-gray-900 mb-2">{product.name}</h1>
 							<div className="flex items-center gap-3 mb-2">
@@ -222,15 +241,15 @@ const ProductDetailPage = () => {
 										<span className="text-2xl font-bold text-gray-900">
 											{formatPrice(product.price)}
 										</span>
-										{product.originalPrice && product.originalPrice > product.price && (
+										{product.old_price && product.old_price > product.price && (
 											<span className="text-sm text-gray-500 line-through">
-												{formatPrice(product.originalPrice)}
+												{formatPrice(product.old_price)}
 											</span>
 										)}
 									</div>
 									{discountPercentage > 0 && (
 										<p className="text-xs text-green-600 font-medium">
-											Save {formatPrice(product.originalPrice! - product.price)} ({discountPercentage}% off)
+											Save {formatPrice(product.old_price! - product.price)} ({discountPercentage}% off)
 										</p>
 									)}
 								</div>
@@ -278,61 +297,72 @@ const ProductDetailPage = () => {
 							{/* Description */}
 							<div className="bg-white p-3 rounded-lg shadow-sm">
 								<h2 className="text-xs font-semibold text-gray-900 mb-1.5 uppercase">Description</h2>
-								<p className="text-xs text-gray-700 leading-relaxed line-clamp-4">{product.description || product.shortDescription}</p>
+								<p className="text-xs text-gray-700 leading-relaxed mb-2 whitespace-pre-line">
+									{product.description || 'No description available for this product.'}
+								</p>
+								{product.short_specs && (
+									<div className="mt-2">
+										<h3 className="text-[10px] font-semibold text-gray-900 mb-1 uppercase tracking-wide">Key Specs</h3>
+										<p className="text-xs text-gray-700 whitespace-pre-line">{product.short_specs}</p>
+									</div>
+								)}
 							</div>
 
-							{/* Key Specifications */}
-							<div className="bg-white p-3 rounded-lg shadow-sm">
-								<h2 className="text-xs font-semibold text-gray-900 mb-1.5 uppercase">Specifications</h2>
-								<div className="space-y-1 text-xs">
-									{product.processor && (
+							{/* Warranty (DB-backed) & core product details */}
+							<div className="bg-white p-3 rounded-lg shadow-sm space-y-2">
+								{product.warranty && (
+									<div>
+										<h2 className="text-xs font-semibold text-gray-900 mb-1.5 uppercase">Warranty</h2>
+										<p className="text-xs text-gray-700 leading-relaxed">{product.warranty}</p>
+									</div>
+								)}
+								<div className="mt-1">
+									<h2 className="text-xs font-semibold text-gray-900 mb-1.5 uppercase">Product Details</h2>
+									<dl className="grid grid-cols-1 gap-1 text-xs text-gray-700">
 										<div className="flex justify-between">
-											<span className="text-gray-600">Processor:</span>
-											<span className="font-medium text-gray-900">{product.processor}</span>
+											<dt className="font-medium text-gray-600">Brand</dt>
+											<dd className="ml-2 text-gray-800">{product.brand}</dd>
 										</div>
-									)}
-									{product.ram && (
-										<div className="flex justify-between">
-											<span className="text-gray-600">RAM:</span>
-											<span className="font-medium text-gray-900">{product.ram}</span>
-										</div>
-									)}
-									{product.storage && (
-										<div className="flex justify-between">
-											<span className="text-gray-600">Storage:</span>
-											<span className="font-medium text-gray-900">{product.storage}</span>
-										</div>
-									)}
-									{product.screen_size && (
-										<div className="flex justify-between">
-											<span className="text-gray-600">Screen:</span>
-											<span className="font-medium text-gray-900">{product.screen_size}</span>
-										</div>
-									)}
-									{product.warranty && (
-										<div className="flex justify-between">
-											<span className="text-gray-600">Warranty:</span>
-											<span className="font-medium text-gray-900">{product.warranty}</span>
-										</div>
-									)}
+										{model && (
+											<div className="flex justify-between">
+												<dt className="font-medium text-gray-600">Model</dt>
+												<dd className="ml-2 text-gray-800">{model}</dd>
+											</div>
+										)}
+									</dl>
 								</div>
+								{(tags.length > 0 || flags.length > 0) && (
+									<div className="mt-2 space-y-1">
+										{tags.length > 0 && (
+											<div className="flex flex-wrap gap-1">
+												<span className="text-[10px] font-semibold text-gray-600 uppercase mr-1">Tags:</span>
+												{tags.map((tag) => (
+													<span
+														key={tag}
+														className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] bg-blue-50 text-blue-700 border border-blue-100"
+													>
+														{tag}
+													</span>
+												))}
+											</div>
+										)}
+										{flags.length > 0 && (
+											<div className="flex flex-wrap gap-1">
+												<span className="text-[10px] font-semibold text-gray-600 uppercase mr-1">Flags:</span>
+												{flags.map((flag) => (
+													<span
+														key={flag}
+														className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-100"
+													>
+														{flag}
+													</span>
+												))}
+											</div>
+										)}
+									</div>
+								)}
 							</div>
 						</div>
-
-						{/* Key Features - Compact */}
-						{features.length > 0 && (
-							<div className="bg-white p-3 rounded-lg shadow-sm">
-								<h2 className="text-xs font-semibold text-gray-900 mb-2 uppercase">Key Features</h2>
-								<div className="grid grid-cols-2 gap-x-4 gap-y-1">
-									{features.slice(0, 6).map((feature: string, index: number) => (
-										<div key={index} className="flex items-start gap-1.5 text-xs text-gray-700">
-											<Check className="h-3 w-3 text-green-600 flex-shrink-0 mt-0.5" />
-											<span className="line-clamp-1">{feature}</span>
-										</div>
-									))}
-								</div>
-							</div>
-						)}
 
 						{/* Service Features - Compact */}
 						<div className="grid grid-cols-2 gap-2">

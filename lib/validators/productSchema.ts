@@ -1,35 +1,45 @@
 import { z } from 'zod';
 
+// This schema represents the payload we accept from the admin UI
+// when creating/updating a product. It is aligned with the Supabase
+// `products` table columns and intentionally excludes DB-managed
+// timestamps (created_at, updated_at).
+
 export const productSchema = z.object({
+  // Core identifiers
+  sku: z.string().min(1, 'SKU is required'),
   name: z.string().min(1, 'Product name is required'),
   slug: z.string().optional(),
-  description: z.string().min(1, 'Description is required'),
-  category: z.string().min(1, 'Category is required'),
-  sub_category: z.string().nullable().optional(),
+
+  // Category relations (FKs)
+  category_id: z.string().min(1, 'Category is required'),
+  subcategory_id: z.string().nullable().optional(),
+
+  // Branding / model
   brand: z.string().min(1, 'Brand is required'),
   model: z.string().nullable().optional(),
+
+  // Pricing & stock
   price: z.number().positive('Price must be positive'),
-  original_price: z.number().positive().nullable().optional(),
+  old_price: z.number().positive().nullable().optional(),
   stock: z.number().int().min(0, 'Stock cannot be negative'),
-  sku: z.string().nullable().optional(),
+
+  // Media
+  thumbnail: z.string().url('Thumbnail URL is invalid'),
+  images: z
+    .array(z.string().url('Image URL is invalid'))
+    .min(1, 'At least one image is required'),
+
+  // Content
+  description: z.string().min(1, 'Description is required'),
+  short_specs: z.string().optional(), // plain text/markup paragraph
   warranty: z.string().nullable().optional(),
-  condition: z.enum(['new', 'refurbished', 'used']).default('new'),
-  tags: z.array(z.string()).optional(),
-  processor: z.string().nullable().optional(),
-  ram: z.string().nullable().optional(),
-  storage: z.string().nullable().optional(),
-  storage_type: z.string().nullable().optional(),
-  graphics: z.string().nullable().optional(),
-  screen_size: z.string().nullable().optional(),
-  os: z.string().nullable().optional(),
-  camera: z.string().nullable().optional(),
-  battery: z.string().nullable().optional(),
-  color: z.string().nullable().optional(),
-  weight: z.string().nullable().optional(),
-  dimensions: z.string().nullable().optional(),
-  connectivity: z.string().nullable().optional(),
-  additional_specs: z.record(z.any()).nullable().optional(),
-  images: z.array(z.string()).min(1, 'At least one image is required'),
+
+  // Classification
+  tags: z.array(z.string()).default([]),
+  flags: z.array(z.string()).default([]),
+
+  // Visibility / lifecycle
   status: z.enum(['active', 'inactive']).default('active'),
 });
 

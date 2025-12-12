@@ -6,12 +6,16 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-export async function GET(_: Request, { params }: { params: { product_id: string } }) {
+export async function GET(
+  _req: Request,
+  context: { params: Promise<{ product_id: string }> }
+) {
   try {
+    const { product_id } = await context.params;
     const { data, error } = await supabase
       .from("products")
       .select("*")
-      .eq("id", params.product_id)
+      .eq("id", product_id)
       .single();
     if (error) throw error;
 
@@ -21,13 +25,17 @@ export async function GET(_: Request, { params }: { params: { product_id: string
   }
 }
 
-export async function PATCH(req: Request, { params }: { params: { product_id: string } }) {
+export async function PATCH(
+  req: Request,
+  context: { params: Promise<{ product_id: string }> }
+) {
   try {
     const body = await req.json();
+    const { product_id } = await context.params;
     const { data, error } = await supabase
       .from("products")
       .update(body)
-      .eq("id", params.product_id)
+      .eq("id", product_id)
       .select()
       .single();
     if (error) throw error;
@@ -38,9 +46,13 @@ export async function PATCH(req: Request, { params }: { params: { product_id: st
   }
 }
 
-export async function DELETE(_: Request, { params }: { params: { product_id: string } }) {
+export async function DELETE(
+  _req: Request,
+  context: { params: Promise<{ product_id: string }> }
+) {
   try {
-    const { error } = await supabase.from("products").delete().eq("id", params.product_id);
+    const { product_id } = await context.params;
+    const { error } = await supabase.from("products").delete().eq("id", product_id);
     if (error) throw error;
 
     return NextResponse.json({ message: "Product deleted successfully" });

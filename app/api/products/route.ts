@@ -26,7 +26,7 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    // Validate the input
+    // Validate the input against the updated schema
     const validatedData = productSchema.parse(body);
 
     // Generate slug if not provided
