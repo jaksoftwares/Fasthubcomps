@@ -18,6 +18,22 @@ import { cn } from '@/lib/utils';
 
 const ITEMS_PER_PAGE = 24;
 
+// Map category slugs to Supabase category_id values so we can
+// translate URLs like ?category=laptops to the correct UUID.
+const CATEGORY_SLUG_TO_ID: Record<string, string> = {
+  networking: '01de6a8b-6347-4310-9b08-ae0a108b9f80',
+  laptops: '93d6ba2c-91aa-4c5d-8a85-5161533d96c4',
+  desktops: 'ea116946-4593-4376-9100-c595bba48a7b',
+  servers: '69d5f35f-a41e-4efd-be3f-ac00acb016fb',
+  printers: '87870d8c-4cbd-4b39-a43a-b8f08cac0873',
+  'phones-tablets': '05a23952-7ba0-4ad5-a708-1999034bc7fd',
+  tvs: '59d99502-78f6-4eb2-aa26-8059ec31d5fe',
+  monitors: '948e5fa7-080c-47ba-9c20-d63d119231b0',
+  accessories: '614896bb-8cad-4690-9d60-617857092e56',
+  storage: 'aaaf46a9-6363-4b85-8192-95af924d8f5a',
+  gaming: '1ba300ed-82f9-4c3e-8cfc-961f684a4cd5',
+};
+
 // Product interface
 interface Product {
   id: string;
@@ -38,6 +54,16 @@ interface Product {
 
 const ProductsPage = () => {
   const searchParams = useSearchParams();
+  const rawCategoryParam = searchParams.get('category');
+
+  // Resolve the category filter from URL: support both slugs ("laptops")
+  // and direct UUIDs (category_id). Internally we always use category_id.
+  const initialCategory: string = (() => {
+    if (!rawCategoryParam) return 'all';
+    if (rawCategoryParam === 'all') return 'all';
+    const bySlug = CATEGORY_SLUG_TO_ID[rawCategoryParam];
+    return bySlug || rawCategoryParam;
+  })();
   
   // View and layout states
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -47,7 +73,7 @@ const ProductsPage = () => {
   // Filters state
   const [filters, setFilters] = useState({
     search: searchParams.get('search') || '',
-    category: searchParams.get('category') || 'all',
+    category: initialCategory,
     priceRange: [0, 500000],
     brand: 'all',
     rating: 0,
@@ -61,14 +87,19 @@ const ProductsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Categories
+  // Categories (using real Supabase IDs so filters line up with products.category_id)
   const categories = [
-    { id: 'laptops', name: 'Laptops' },
-    { id: 'desktops', name: 'Desktop Computers' },
-    { id: 'components', name: 'Components' },
-    { id: 'accessories', name: 'Accessories' },
-    { id: 'tablets', name: 'Tablets' },
-    { id: 'software', name: 'Software' },
+    { id: CATEGORY_SLUG_TO_ID.laptops, name: 'Laptops' },
+    { id: CATEGORY_SLUG_TO_ID.desktops, name: 'Desktop Computers' },
+    { id: CATEGORY_SLUG_TO_ID.servers, name: 'Servers' },
+    { id: CATEGORY_SLUG_TO_ID.networking, name: 'Networking' },
+    { id: CATEGORY_SLUG_TO_ID['phones-tablets'], name: 'Phones & Tablets' },
+    { id: CATEGORY_SLUG_TO_ID.tvs, name: 'TVs' },
+    { id: CATEGORY_SLUG_TO_ID.monitors, name: 'Monitors' },
+    { id: CATEGORY_SLUG_TO_ID.gaming, name: 'Gaming' },
+    { id: CATEGORY_SLUG_TO_ID.storage, name: 'Storage' },
+    { id: CATEGORY_SLUG_TO_ID.printers, name: 'Printers' },
+    { id: CATEGORY_SLUG_TO_ID.accessories, name: 'Accessories' },
   ];
 
   // Brands
@@ -92,7 +123,9 @@ const ProductsPage = () => {
               price: Number(p.price) || 0,
               original_price: Number(p.old_price) || Number(p.price) || 0,
               images: Array.isArray(p.images) ? p.images : ['/placeholder.png'],
-              category: p.category_id || 'accessories',
+              // Keep the raw category_id here; filters and sections will
+              // compare against this value.
+              category: p.category_id || '',
               brand: p.brand || 'Generic',
               rating: Number(p.rating) || 4.5,
               reviews: Number(p.reviews) || Math.floor(Math.random() * 500) + 10,
@@ -127,9 +160,7 @@ const ProductsPage = () => {
 
     // Category filter
     if (filters.category && filters.category !== 'all') {
-      filtered = filtered.filter(product =>
-        product.category?.toLowerCase() === filters.category.toLowerCase()
-      );
+      filtered = filtered.filter(product => product.category === filters.category);
     }
 
     // Price range filter
@@ -297,7 +328,7 @@ const ProductsPage = () => {
       </div>
 
       {/* Sales-Focused Quick Sections */}
-      {!loading && !filters.search && !filters.category || filters.category === 'all' ? (
+      {!loading && !filters.search && (filters.category === 'all' || !filters.category) ? (
         <div className="bg-white border-b">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             {/* On Sale Section */}
@@ -564,13 +595,13 @@ const ProductsPage = () => {
         </div>
 
         {/* Horizontal Product Sections - After Main Grid */}
-        {!loading && !filters.search && !filters.category || filters.category === 'all' ? (
+        {!loading && !filters.search && (filters.category === 'all' || !filters.category) ? (
           <div className="mt-8 space-y-8">
             {/* Black Friday - Refurbished Laptops Section */}
             <div className="bg-gray-50 py-8">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="bg-orange-600 text-white px-6 py-3 rounded mb-6 flex items-center justify-between">
-                  <h3 className="text-xl font-semibold">Black Friday | Refurbished Laptops | From 11K</h3>
+                  <h3 className="text-lg md:text-xl font-semibold">Black Friday | Refurbished Laptops | From 11K</h3>
                   <Button 
                     variant="ghost" 
                     className="text-white hover:bg-orange-700"
@@ -580,8 +611,19 @@ const ProductsPage = () => {
                   </Button>
                 </div>
                 <div className="flex space-x-4 overflow-x-auto pb-4">
-                  {allProducts.filter(p => p.category === 'laptops' && p.discount > 0).slice(0, 12).map((product) => (
-                    <div key={product.id} className="flex-shrink-0 w-48">
+                  {allProducts
+                    .filter(p =>
+                      p.category === CATEGORY_SLUG_TO_ID.laptops &&
+                      p.discount > 0 &&
+                      p.price >= 11000 &&
+                      p.price < 30000
+                    )
+                    .slice(0, 12)
+                    .map((product, index) => (
+                    <div
+                      key={product.id}
+                      className={`flex-shrink-0 ${index === 0 ? 'w-56' : 'w-44'}`}
+                    >
                       <ProductCard product={product} viewMode="grid" />
                     </div>
                   ))}
@@ -593,7 +635,7 @@ const ProductsPage = () => {
             <div className="bg-gray-50 py-8">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="bg-orange-600 text-white px-6 py-3 rounded mb-6 flex items-center justify-between">
-                  <h3 className="text-xl font-semibold">Black Friday | New Laptop Deals | From 30K</h3>
+                  <h3 className="text-lg md:text-xl font-semibold">Black Friday | New Laptop Deals | From 30K</h3>
                   <Button 
                     variant="ghost" 
                     className="text-white hover:bg-orange-700"
@@ -603,8 +645,14 @@ const ProductsPage = () => {
                   </Button>
                 </div>
                 <div className="flex space-x-4 overflow-x-auto pb-4">
-                  {allProducts.filter(p => p.category === 'laptops').slice(0, 12).map((product) => (
-                    <div key={product.id} className="flex-shrink-0 w-48">
+                  {allProducts
+                    .filter(p => p.category === CATEGORY_SLUG_TO_ID.laptops && p.price >= 30000)
+                    .slice(0, 12)
+                    .map((product, index) => (
+                    <div
+                      key={product.id}
+                      className={`flex-shrink-0 ${index === 0 ? 'w-56' : 'w-44'}`}
+                    >
                       <ProductCard product={product} viewMode="grid" />
                     </div>
                   ))}
@@ -616,7 +664,7 @@ const ProductsPage = () => {
             <div className="bg-white py-8">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="bg-orange-600 text-white px-6 py-3 rounded mb-6 flex items-center justify-between">
-                  <h3 className="text-xl font-semibold">Desktop Computers & Workstations</h3>
+                  <h3 className="text-lg md:text-xl font-semibold">Desktop Computers & Workstations</h3>
                   <Button 
                     variant="ghost" 
                     className="text-white hover:bg-orange-700"
@@ -626,31 +674,42 @@ const ProductsPage = () => {
                   </Button>
                 </div>
                 <div className="flex space-x-4 overflow-x-auto pb-4">
-                  {allProducts.filter(p => p.category === 'desktops').slice(0, 12).map((product) => (
-                    <div key={product.id} className="flex-shrink-0 w-48">
+                  {allProducts
+                    .filter(p => p.category === CATEGORY_SLUG_TO_ID.desktops)
+                    .slice(0, 12)
+                    .map((product, index) => (
+                    <div
+                      key={product.id}
+                      className={`flex-shrink-0 ${index % 4 === 0 ? 'w-56' : 'w-44'}`}
+                    >
                       <ProductCard product={product} viewMode="grid" />
                     </div>
                   ))}
                 </div>
               </div>
             </div>
-
-            {/* Components Section */}
+            {/* Networking Section */}
             <div className="bg-gray-50 py-8">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="bg-orange-600 text-white px-6 py-3 rounded mb-6 flex items-center justify-between">
-                  <h3 className="text-xl font-semibold">Computer Components & Hardware</h3>
+                  <h3 className="text-lg md:text-xl font-semibold">Networking Deals</h3>
                   <Button 
                     variant="ghost" 
                     className="text-white hover:bg-orange-700"
-                    onClick={() => handleFilterChange({ category: 'components' })}
+                    onClick={() => handleFilterChange({ category: 'networking' })}
                   >
                     See All →
                   </Button>
                 </div>
                 <div className="flex space-x-4 overflow-x-auto pb-4">
-                  {allProducts.filter(p => p.category === 'components').slice(0, 12).map((product) => (
-                    <div key={product.id} className="flex-shrink-0 w-48">
+                  {allProducts
+                    .filter(p => p.category === CATEGORY_SLUG_TO_ID.networking)
+                    .slice(0, 12)
+                    .map((product, index) => (
+                    <div
+                      key={product.id}
+                      className={`flex-shrink-0 ${index === 0 ? 'w-56' : 'w-44'}`}
+                    >
                       <ProductCard product={product} viewMode="grid" />
                     </div>
                   ))}
@@ -658,22 +717,28 @@ const ProductsPage = () => {
               </div>
             </div>
 
-            {/* Accessories Section */}
+            {/* Servers Section */}
             <div className="bg-white py-8">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="bg-orange-600 text-white px-6 py-3 rounded mb-6 flex items-center justify-between">
-                  <h3 className="text-xl font-semibold">IT Accessories & Peripherals</h3>
+                  <h3 className="text-lg md:text-xl font-semibold">Server Hardware</h3>
                   <Button 
                     variant="ghost" 
                     className="text-white hover:bg-orange-700"
-                    onClick={() => handleFilterChange({ category: 'accessories' })}
+                    onClick={() => handleFilterChange({ category: 'servers' })}
                   >
                     See All →
                   </Button>
                 </div>
                 <div className="flex space-x-4 overflow-x-auto pb-4">
-                  {allProducts.filter(p => p.category === 'accessories').slice(0, 12).map((product) => (
-                    <div key={product.id} className="flex-shrink-0 w-48">
+                  {allProducts
+                    .filter(p => p.category === CATEGORY_SLUG_TO_ID.servers)
+                    .slice(0, 12)
+                    .map((product, index) => (
+                    <div
+                      key={product.id}
+                      className={`flex-shrink-0 ${index % 3 === 0 ? 'w-60' : 'w-44'}`}
+                    >
                       <ProductCard product={product} viewMode="grid" />
                     </div>
                   ))}
@@ -681,22 +746,28 @@ const ProductsPage = () => {
               </div>
             </div>
 
-            {/* Tablets Section */}
+            {/* Phones & Tablets Section */}
             <div className="bg-gray-50 py-8">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="bg-orange-600 text-white px-6 py-3 rounded mb-6 flex items-center justify-between">
-                  <h3 className="text-xl font-semibold">Tablets & Mobile Devices</h3>
+                  <h3 className="text-lg md:text-xl font-semibold">Phones & Tablets</h3>
                   <Button 
                     variant="ghost" 
                     className="text-white hover:bg-orange-700"
-                    onClick={() => handleFilterChange({ category: 'tablets' })}
+                    onClick={() => handleFilterChange({ category: 'phones-tablets' })}
                   >
                     See All →
                   </Button>
                 </div>
                 <div className="flex space-x-4 overflow-x-auto pb-4">
-                  {allProducts.filter(p => p.category === 'tablets').slice(0, 12).map((product) => (
-                    <div key={product.id} className="flex-shrink-0 w-48">
+                  {allProducts
+                    .filter(p => p.category === CATEGORY_SLUG_TO_ID['phones-tablets'])
+                    .slice(0, 12)
+                    .map((product, index) => (
+                    <div
+                      key={product.id}
+                      className={`flex-shrink-0 ${index === 1 ? 'w-56' : 'w-44'}`}
+                    >
                       <ProductCard product={product} viewMode="grid" />
                     </div>
                   ))}
@@ -704,22 +775,126 @@ const ProductsPage = () => {
               </div>
             </div>
 
-            {/* Software Section */}
+            {/* TVs & Monitors Section */}
             <div className="bg-white py-8">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="bg-orange-600 text-white px-6 py-3 rounded mb-6 flex items-center justify-between">
-                  <h3 className="text-xl font-semibold">Software & Licenses</h3>
+                  <h3 className="text-lg md:text-xl font-semibold">TVs & Monitors</h3>
                   <Button 
                     variant="ghost" 
                     className="text-white hover:bg-orange-700"
-                    onClick={() => handleFilterChange({ category: 'software' })}
+                    onClick={() => handleFilterChange({ category: 'tvs' })}
                   >
                     See All →
                   </Button>
                 </div>
                 <div className="flex space-x-4 overflow-x-auto pb-4">
-                  {allProducts.filter(p => p.category === 'software').slice(0, 12).map((product) => (
-                    <div key={product.id} className="flex-shrink-0 w-48">
+                  {allProducts
+                    .filter(p =>
+                      p.category === CATEGORY_SLUG_TO_ID.tvs ||
+                      p.category === CATEGORY_SLUG_TO_ID.monitors
+                    )
+                    .slice(0, 12)
+                    .map((product, index) => (
+                    <div
+                      key={product.id}
+                      className={`flex-shrink-0 ${index % 5 === 0 ? 'w-60' : 'w-44'}`}
+                    >
+                      <ProductCard product={product} viewMode="grid" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Gaming Section */}
+            <div className="bg-gray-50 py-8">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="bg-orange-600 text-white px-6 py-3 rounded mb-6 flex items-center justify-between">
+                  <h3 className="text-lg md:text-xl font-semibold">Gaming PCs & Accessories</h3>
+                  <Button 
+                    variant="ghost" 
+                    className="text-white hover:bg-orange-700"
+                    onClick={() => handleFilterChange({ category: 'gaming' })}
+                  >
+                    See All →
+                  </Button>
+                </div>
+                <div className="flex space-x-4 overflow-x-auto pb-4">
+                  {allProducts
+                    .filter(p => p.category === CATEGORY_SLUG_TO_ID.gaming)
+                    .slice(0, 12)
+                    .map((product, index) => (
+                    <div
+                      key={product.id}
+                      className={`flex-shrink-0 ${index === 0 ? 'w-60' : 'w-44'}`}
+                    >
+                      <ProductCard product={product} viewMode="grid" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Storage & Components Section */}
+            <div className="bg-white py-8">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="bg-orange-600 text-white px-6 py-3 rounded mb-6 flex items-center justify-between">
+                  <h3 className="text-lg md:text-xl font-semibold">Storage & Components</h3>
+                  <Button 
+                    variant="ghost" 
+                    className="text-white hover:bg-orange-700"
+                    onClick={() => handleFilterChange({ category: 'storage' })}
+                  >
+                    See All →
+                  </Button>
+                </div>
+                <div className="flex space-x-4 overflow-x-auto pb-4">
+                  {allProducts
+                    .filter(p =>
+                      p.category === CATEGORY_SLUG_TO_ID.storage ||
+                      // components is a different table; treat it as any product
+                      // whose category_id is not in the main electronics set.
+                      !(p.category && Object.values(CATEGORY_SLUG_TO_ID).includes(p.category))
+                    )
+                    .slice(0, 12)
+                    .map((product, index) => (
+                    <div
+                      key={product.id}
+                      className={`flex-shrink-0 ${index % 4 === 0 ? 'w-56' : 'w-44'}`}
+                    >
+                      <ProductCard product={product} viewMode="grid" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Printers & Accessories Section */}
+            <div className="bg-gray-50 py-8">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="bg-orange-600 text-white px-6 py-3 rounded mb-6 flex items-center justify-between">
+                  <h3 className="text-lg md:text-xl font-semibold">Printers & Accessories</h3>
+                  <Button 
+                    variant="ghost" 
+                    className="text-white hover:bg-orange-700"
+                    onClick={() => handleFilterChange({ category: 'printers' })}
+                  >
+                    See All →
+                  </Button>
+                </div>
+                <div className="flex space-x-4 overflow-x-auto pb-4">
+                  {allProducts
+                    .filter(p =>
+                      p.category === CATEGORY_SLUG_TO_ID.printers ||
+                      p.category === CATEGORY_SLUG_TO_ID.accessories
+                    )
+                    .slice(0, 12)
+                    .map((product, index) => (
+                    <div
+                      key={product.id}
+                      className={`flex-shrink-0 ${index === 0 || index === 4 ? 'w-56' : 'w-44'}`}
+                    >
                       <ProductCard product={product} viewMode="grid" />
                     </div>
                   ))}

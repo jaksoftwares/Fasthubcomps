@@ -5,11 +5,9 @@ import FeaturedProducts from '@/components/home/FeaturedProducts';
 import Categories from '@/components/home/Categories';
 import TopSales from '@/components/home/TopSales';
 import BestDeals from '@/components/home/BestDeals';
-import Services from '@/components/home/Services';
 import Newsletter from '@/components/home/Newsletter';
 import TrustBadges from '@/components/home/TrustBadges';
-import WhyChooseUs from '@/components/home/WhyChooseUs';
-import Testimonials from '@/components/home/Testimonials';
+import CategoryStrips from '@/components/home/CategoryStrips';
 
 export default function Home() {
   return (
@@ -29,17 +27,11 @@ export default function Home() {
         {/* Shop by Category - Enhanced with better visuals */}
         <Categories />
         
-        {/* Trust Badges & Brand Partners - MOVED DOWN */}
+        {/* Key Product Categories - Compact strips per category */}
+        <CategoryStrips />
+        
+        {/* Trust Badges & Brand Partners */}
         <TrustBadges />
-        
-        {/* Services - Repair and support services - MOVED DOWN */}
-        <Services />
-        
-        {/* Why Choose Us - MOVED DOWN */}
-        <WhyChooseUs />
-        
-        {/* Customer Testimonials - MOVED DOWN */}
-        <Testimonials />
         
         {/* Newsletter Subscription */}
         <Newsletter />
