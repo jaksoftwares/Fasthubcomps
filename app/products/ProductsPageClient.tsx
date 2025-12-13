@@ -59,11 +59,11 @@ const ProductsPageClient = () => {
     const bySlug = CATEGORY_SLUG_TO_ID[rawCategoryParam];
     return bySlug || rawCategoryParam;
   })();
-
+  
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-
+  
   const [filters, setFilters] = useState({
     search: searchParams.get('search') || '',
     category: initialCategory,
@@ -238,8 +238,662 @@ const ProductsPageClient = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
+      
+      {/* Breadcrumb Navigation */}
       <Breadcrumb />
-      {/* ...rest of the JSX copied from original ProductsPage return... */}
+      
+      {/* Clean Header */}
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Products</h1>
+              <p className="text-gray-600">
+                {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'} found
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Input
+                placeholder="Search products..."
+                value={filters.search}
+                onChange={(e) => handleFilterChange({ search: e.target.value })}
+                className="w-full sm:w-64"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowFilters(!showFilters)}
+                className="sm:hidden"
+              >
+                <Filter className="h-4 w-4 mr-2" />
+                Filters
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Category Navigation */}
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex space-x-8 py-4 overflow-x-auto">
+            <Button
+              variant={filters.category === 'all' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => handleFilterChange({ category: 'all' })}
+              className="whitespace-nowrap"
+            >
+              All
+            </Button>
+            
+            {categories.map((category) => (
+              <Button
+                key={category.id}
+                variant={filters.category === category.id ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => handleFilterChange({ category: category.id })}
+                className="whitespace-nowrap"
+              >
+                {category.name}
+              </Button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Sales-Focused Quick Sections */}
+      {!loading && !filters.search && (filters.category === 'all' || !filters.category) ? (
+        <div className="bg-white border-b">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            {/* On Sale Section */}
+            {onSaleProducts.length > 0 && (
+              <Card className="border-red-200 bg-red-50">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold text-gray-900 flex items-center">
+                        <Tag className="h-4 w-4 mr-2 text-red-600" />
+                        Special Offers
+                      </h3>
+                      <p className="text-sm text-gray-600">Up to 50% off selected items</p>
+                      <Button 
+                        variant="link" 
+                        className="text-red-600 p-0 h-auto font-medium"
+                        onClick={() => handleFilterChange({ tags: ['on-sale'] })}
+                      >
+                        Shop Now →
+                      </Button>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-red-600">{onSaleProducts.length}</div>
+                      <div className="text-xs text-gray-600">Deals</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
+      ) : null}
+      
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex gap-8">
+          {/* Filters Sidebar */}
+          <div className={cn(
+            "w-80 space-y-6",
+            showFilters ? "block" : "hidden lg:block"
+          )}>
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold">Filters</h3>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearFilters}
+                    className="text-blue-600 hover:text-blue-800"
+                  >
+                    Clear All
+                  </Button>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Sort */}
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-2 block">Sort by</label>
+                    <Select
+                      value={filters.sortBy}
+                      onValueChange={(value) => handleFilterChange({ sortBy: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="name">Name (A-Z)</SelectItem>
+                        <SelectItem value="price-low">Price (Low to High)</SelectItem>
+                        <SelectItem value="price-high">Price (High to Low)</SelectItem>
+                        <SelectItem value="rating">Highest Rated</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Category */}
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-2 block">Category</label>
+                    <Select
+                      value={filters.category}
+                      onValueChange={(value) => handleFilterChange({ category: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Categories</SelectItem>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Brand */}
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-2 block">Brand</label>
+                    <Select
+                      value={filters.brand}
+                      onValueChange={(value) => handleFilterChange({ brand: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Brands</SelectItem>
+                        {brands.map((brand) => (
+                          <SelectItem key={brand} value={brand}>
+                            {brand}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Rating */}
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-2 block">Minimum Rating</label>
+                    <Select
+                      value={filters.rating.toString()}
+                      onValueChange={(value) => handleFilterChange({ rating: parseInt(value) })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="0">Any Rating</SelectItem>
+                        <SelectItem value="4">4+ Stars</SelectItem>
+                        <SelectItem value="3">3+ Stars</SelectItem>
+                        <SelectItem value="2">2+ Stars</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Products Grid */}
+          <div className="flex-1">
+            {/* Controls */}
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-4">
+                <span className="text-gray-600">
+                  {startIndex + 1}-{Math.min(endIndex, filteredProducts.length)} of {filteredProducts.length} products
+                </span>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-700">View:</span>
+                <div className="flex items-center space-x-1 border rounded-md">
+                  <Button
+                    variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('grid')}
+                    className="rounded-r-none"
+                  >
+                    <Grid className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant={viewMode === 'list' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('list')}
+                    className="rounded-l-none"
+                  >
+                    <List className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Products */}
+            {loading ? (
+              <div className={cn(
+                "grid gap-6",
+                "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+              )}>
+                {Array.from({ length: 8 }).map((_, idx) => (
+                  <div
+                    key={idx}
+                    className="border rounded-lg bg-white shadow-sm animate-pulse"
+                  >
+                    <div className="h-40 bg-gray-200 rounded-t-lg" />
+                    <div className="p-3 space-y-2">
+                      <div className="h-3 bg-gray-200 rounded w-3/4" />
+                      <div className="h-3 bg-gray-200 rounded w-1/2" />
+                      <div className="h-4 bg-gray-200 rounded w-1/3 mt-1" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : error ? (
+              <div className="text-center py-12">
+                <p className="text-red-500">{error}</p>
+                <Button onClick={() => window.location.reload()} className="mt-4">
+                  Retry
+                </Button>
+              </div>
+            ) : currentProducts.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-gray-500 text-lg">No products found.</p>
+                <p className="text-gray-400 text-sm mt-2">Try adjusting your filters or search terms</p>
+                <Button onClick={clearFilters} variant="outline" className="mt-4">
+                  Clear All Filters
+                </Button>
+              </div>
+            ) : (
+              <>
+                <div className={cn(
+                  viewMode === 'grid' 
+                    ? "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+                    : "space-y-4"
+                )}>
+                  {currentProducts.map((product) => (
+                    <ProductCard 
+                      key={product.id} 
+                      product={product}
+                      viewMode={viewMode}
+                    />
+                  ))}
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="mt-8 flex items-center justify-center space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                      Previous
+                    </Button>
+                    
+                    {[...Array(Math.min(5, totalPages))].map((_, i) => {
+                      const page = i + 1;
+                      return (
+                        <Button
+                          key={page}
+                          variant={currentPage === page ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => handlePageChange(page)}
+                        >
+                          {page}
+                        </Button>
+                      );
+                    })}
+                    
+                    {totalPages > 5 && (
+                      <>
+                        <span className="text-gray-500">...</span>
+                        <Button
+                          variant={currentPage === totalPages ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => handlePageChange(totalPages)}
+                        >
+                          {totalPages}
+                        </Button>
+                      </>
+                    )}
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                    >
+                      Next
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Horizontal Product Sections - After Main Grid */}
+        {!loading && !filters.search && (filters.category === 'all' || !filters.category) ? (
+          <div className="mt-8 space-y-8">
+            {/* Black Friday - Refurbished Laptops Section */}
+            <div className="bg-gray-50 py-8">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="bg-orange-600 text-white px-6 py-3 rounded mb-6 flex items-center justify-between">
+                  <h3 className="text-lg md:text-xl font-semibold">Black Friday | Refurbished Laptops | From 11K</h3>
+                  <Button 
+                    variant="ghost" 
+                    className="text-white hover:bg-orange-700"
+                    onClick={() => handleFilterChange({ category: 'laptops', tags: ['on-sale'] })}
+                  >
+                    See All →
+                  </Button>
+                </div>
+                <div className="flex space-x-4 overflow-x-auto pb-4">
+                  {allProducts
+                    .filter(p =>
+                      p.category === CATEGORY_SLUG_TO_ID.laptops &&
+                      p.discount > 0 &&
+                      p.price >= 11000 &&
+                      p.price < 30000
+                    )
+                    .slice(0, 12)
+                    .map((product, index) => (
+                    <div
+                      key={product.id}
+                      className={`flex-shrink-0 ${index === 0 ? 'w-56' : 'w-44'}`}
+                    >
+                      <ProductCard product={product} viewMode="grid" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Black Friday - New Laptop Deals Section */}
+            <div className="bg-gray-50 py-8">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="bg-orange-600 text-white px-6 py-3 rounded mb-6 flex items-center justify-between">
+                  <h3 className="text-lg md:text-xl font-semibold">Black Friday | New Laptop Deals | From 30K</h3>
+                  <Button 
+                    variant="ghost" 
+                    className="text-white hover:bg-orange-700"
+                    onClick={() => handleFilterChange({ category: 'laptops' })}
+                  >
+                    See All →
+                  </Button>
+                </div>
+                <div className="flex space-x-4 overflow-x-auto pb-4">
+                  {allProducts
+                    .filter(p => p.category === CATEGORY_SLUG_TO_ID.laptops && p.price >= 30000)
+                    .slice(0, 12)
+                    .map((product, index) => (
+                    <div
+                      key={product.id}
+                      className={`flex-shrink-0 ${index === 0 ? 'w-56' : 'w-44'}`}
+                    >
+                      <ProductCard product={product} viewMode="grid" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Desktop Computers Section */}
+            <div className="bg-white py-8">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="bg-orange-600 text-white px-6 py-3 rounded mb-6 flex items-center justify-between">
+                  <h3 className="text-lg md:text-xl font-semibold">Desktop Computers & Workstations</h3>
+                  <Button 
+                    variant="ghost" 
+                    className="text-white hover:bg-orange-700"
+                    onClick={() => handleFilterChange({ category: 'desktops' })}
+                  >
+                    See All →
+                  </Button>
+                </div>
+                <div className="flex space-x-4 overflow-x-auto pb-4">
+                  {allProducts
+                    .filter(p => p.category === CATEGORY_SLUG_TO_ID.desktops)
+                    .slice(0, 12)
+                    .map((product, index) => (
+                    <div
+                      key={product.id}
+                      className={`flex-shrink-0 ${index % 4 === 0 ? 'w-56' : 'w-44'}`}
+                    >
+                      <ProductCard product={product} viewMode="grid" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            {/* Networking Section */}
+            <div className="bg-gray-50 py-8">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="bg-orange-600 text-white px-6 py-3 rounded mb-6 flex items-center justify-between">
+                  <h3 className="text-lg md:text-xl font-semibold">Networking Deals</h3>
+                  <Button 
+                    variant="ghost" 
+                    className="text-white hover:bg-orange-700"
+                    onClick={() => handleFilterChange({ category: 'networking' })}
+                  >
+                    See All →
+                  </Button>
+                </div>
+                <div className="flex space-x-4 overflow-x-auto pb-4">
+                  {allProducts
+                    .filter(p => p.category === CATEGORY_SLUG_TO_ID.networking)
+                    .slice(0, 12)
+                    .map((product, index) => (
+                    <div
+                      key={product.id}
+                      className={`flex-shrink-0 ${index === 0 ? 'w-56' : 'w-44'}`}
+                    >
+                      <ProductCard product={product} viewMode="grid" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Servers Section */}
+            <div className="bg-white py-8">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="bg-orange-600 text-white px-6 py-3 rounded mb-6 flex items-center justify-between">
+                  <h3 className="text-lg md:text-xl font-semibold">Server Hardware</h3>
+                  <Button 
+                    variant="ghost" 
+                    className="text-white hover:bg-orange-700"
+                    onClick={() => handleFilterChange({ category: 'servers' })}
+                  >
+                    See All →
+                  </Button>
+                </div>
+                <div className="flex space-x-4 overflow-x-auto pb-4">
+                  {allProducts
+                    .filter(p => p.category === CATEGORY_SLUG_TO_ID.servers)
+                    .slice(0, 12)
+                    .map((product, index) => (
+                    <div
+                      key={product.id}
+                      className={`flex-shrink-0 ${index % 3 === 0 ? 'w-60' : 'w-44'}`}
+                    >
+                      <ProductCard product={product} viewMode="grid" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Phones & Tablets Section */}
+            <div className="bg-gray-50 py-8">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="bg-orange-600 text-white px-6 py-3 rounded mb-6 flex items-center justify-between">
+                  <h3 className="text-lg md:text-xl font-semibold">Phones & Tablets</h3>
+                  <Button 
+                    variant="ghost" 
+                    className="text-white hover:bg-orange-700"
+                    onClick={() => handleFilterChange({ category: 'phones-tablets' })}
+                  >
+                    See All →
+                  </Button>
+                </div>
+                <div className="flex space-x-4 overflow-x-auto pb-4">
+                  {allProducts
+                    .filter(p => p.category === CATEGORY_SLUG_TO_ID['phones-tablets'])
+                    .slice(0, 12)
+                    .map((product, index) => (
+                    <div
+                      key={product.id}
+                      className={`flex-shrink-0 ${index === 1 ? 'w-56' : 'w-44'}`}
+                    >
+                      <ProductCard product={product} viewMode="grid" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* TVs & Monitors Section */}
+            <div className="bg-white py-8">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="bg-orange-600 text-white px-6 py-3 rounded mb-6 flex items-center justify-between">
+                  <h3 className="text-lg md:text-xl font-semibold">TVs & Monitors</h3>
+                  <Button 
+                    variant="ghost" 
+                    className="text-white hover:bg-orange-700"
+                    onClick={() => handleFilterChange({ category: 'tvs' })}
+                  >
+                    See All →
+                  </Button>
+                </div>
+                <div className="flex space-x-4 overflow-x-auto pb-4">
+                  {allProducts
+                    .filter(p =>
+                      p.category === CATEGORY_SLUG_TO_ID.tvs ||
+                      p.category === CATEGORY_SLUG_TO_ID.monitors
+                    )
+                    .slice(0, 12)
+                    .map((product, index) => (
+                    <div
+                      key={product.id}
+                      className={`flex-shrink-0 ${index % 5 === 0 ? 'w-60' : 'w-44'}`}
+                    >
+                      <ProductCard product={product} viewMode="grid" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Gaming Section */}
+            <div className="bg-gray-50 py-8">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="bg-orange-600 text-white px-6 py-3 rounded mb-6 flex items-center justify-between">
+                  <h3 className="text-lg md:text-xl font-semibold">Gaming PCs & Accessories</h3>
+                  <Button 
+                    variant="ghost" 
+                    className="text-white hover:bg-orange-700"
+                    onClick={() => handleFilterChange({ category: 'gaming' })}
+                  >
+                    See All →
+                  </Button>
+                </div>
+                <div className="flex space-x-4 overflow-x-auto pb-4">
+                  {allProducts
+                    .filter(p => p.category === CATEGORY_SLUG_TO_ID.gaming)
+                    .slice(0, 12)
+                    .map((product, index) => (
+                    <div
+                      key={product.id}
+                      className={`flex-shrink-0 ${index === 0 ? 'w-60' : 'w-44'}`}
+                    >
+                      <ProductCard product={product} viewMode="grid" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Storage & Components Section */}
+            <div className="bg-white py-8">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="bg-orange-600 text-white px-6 py-3 rounded mb-6 flex items-center justify-between">
+                  <h3 className="text-lg md:text-xl font-semibold">Storage & Components</h3>
+                  <Button 
+                    variant="ghost" 
+                    className="text-white hover:bg-orange-700"
+                    onClick={() => handleFilterChange({ category: 'storage' })}
+                  >
+                    See All →
+                  </Button>
+                </div>
+                <div className="flex space-x-4 overflow-x-auto pb-4">
+                  {allProducts
+                    .filter(p =>
+                      p.category === CATEGORY_SLUG_TO_ID.storage ||
+                      // components is a different table; treat it as any product
+                      // whose category_id is not in the main electronics set.
+                      !(p.category && Object.values(CATEGORY_SLUG_TO_ID).includes(p.category))
+                    )
+                    .slice(0, 12)
+                    .map((product, index) => (
+                    <div
+                      key={product.id}
+                      className={`flex-shrink-0 ${index % 4 === 0 ? 'w-56' : 'w-44'}`}
+                    >
+                      <ProductCard product={product} viewMode="grid" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Printers & Accessories Section */}
+            <div className="bg-gray-50 py-8">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="bg-orange-600 text-white px-6 py-3 rounded mb-6 flex items-center justify-between">
+                  <h3 className="text-lg md:text-xl font-semibold">Printers & Accessories</h3>
+                  <Button 
+                    variant="ghost" 
+                    className="text-white hover:bg-orange-700"
+                    onClick={() => handleFilterChange({ category: 'printers' })}
+                  >
+                    See All →
+                  </Button>
+                </div>
+                <div className="flex space-x-4 overflow-x-auto pb-4">
+                  {allProducts
+                    .filter(p =>
+                      p.category === CATEGORY_SLUG_TO_ID.printers ||
+                      p.category === CATEGORY_SLUG_TO_ID.accessories
+                    )
+                    .slice(0, 12)
+                    .map((product, index) => (
+                    <div
+                      key={product.id}
+                      className={`flex-shrink-0 ${index === 0 || index === 4 ? 'w-56' : 'w-44'}`}
+                    >
+                      <ProductCard product={product} viewMode="grid" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </main>
+
+      <Footer />
     </div>
   );
 };
