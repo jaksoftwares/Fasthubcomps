@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
@@ -7,15 +7,19 @@ const supabase = createClient(
 );
 
 /**
- * POST /api/orders/:order_id/cancel
+ * POST /api/orders/[order_id]/cancel
  * Cancels an existing order if not yet completed.
  */
-export async function POST(_: Request, { params }: { params: { order_id: string } }) {
+export async function POST(
+  _request: NextRequest,
+  { params }: { params: Promise<{ order_id: string }> }
+) {
   try {
+    const { order_id } = await params;
     const { data: existing, error: fetchError } = await supabase
       .from("orders")
       .select("status")
-      .eq("id", params.order_id)
+      .eq("id", order_id)
       .single();
 
     if (fetchError) throw fetchError;
@@ -27,7 +31,7 @@ export async function POST(_: Request, { params }: { params: { order_id: string 
     const { data, error } = await supabase
       .from("orders")
       .update({ status: "cancelled" })
-      .eq("id", params.order_id)
+      .eq("id", order_id)
       .select()
       .single();
 

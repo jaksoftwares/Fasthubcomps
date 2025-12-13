@@ -76,11 +76,20 @@ const Header = () => {
 
   // Update button position when menu opens
   useEffect(() => {
-    if (isCategoryMenuOpen && categoryButtonRef.current) {
+    if (isCategoryMenuOpen && typeof window !== 'undefined' && categoryButtonRef.current) {
       const rect = categoryButtonRef.current.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const menuWidth = 320; // approximate dropdown width
+      const padding = 16; // keep dropdown away from very edge
+
+      const clampedLeft = Math.min(
+        Math.max(rect.left, padding),
+        Math.max(padding, viewportWidth - menuWidth - padding)
+      );
+
       setButtonPosition({
-        top: rect.bottom, // Use viewport coordinates, not document coordinates
-        left: rect.left, // Use viewport coordinates, not document coordinates  
+        top: rect.bottom, // viewport coordinates
+        left: clampedLeft,
         width: rect.width,
       });
     }
@@ -89,19 +98,27 @@ const Header = () => {
   // Update position when window scrolls to keep modal aligned
   useEffect(() => {
     const handleScroll = () => {
-      if (isCategoryMenuOpen && categoryButtonRef.current) {
+      if (isCategoryMenuOpen && typeof window !== 'undefined' && categoryButtonRef.current) {
         const rect = categoryButtonRef.current.getBoundingClientRect();
-        
+        const viewportWidth = window.innerWidth;
+        const menuWidth = 320;
+        const padding = 16;
+
         // Close modal if button is too far from viewport (more than 200px away)
         if (rect.bottom < -200 || rect.top > window.innerHeight + 200) {
           setIsCategoryMenuOpen(false);
           setIsClickOpened(false);
           return;
         }
-        
+
+        const clampedLeft = Math.min(
+          Math.max(rect.left, padding),
+          Math.max(padding, viewportWidth - menuWidth - padding)
+        );
+
         setButtonPosition({
-          top: rect.bottom, // Keep using viewport coordinates
-          left: rect.left, // Keep using viewport coordinates
+          top: rect.bottom,
+          left: clampedLeft,
           width: rect.width,
         });
       }
@@ -387,7 +404,7 @@ const Header = () => {
   return (
     <>
       {/* Top Promo Bar with Contact Info */}
-      <div className="relative bg-gray-900 text-white py-2 px-4 overflow-hidden">
+      <div className="relative bg-gray-900 text-white py-2 px-3 sm:px-4 overflow-hidden">
         {/* Rotating Background Image */}
         <div 
           className="absolute inset-0 bg-cover bg-center transition-all duration-1000 opacity-50"
@@ -399,7 +416,7 @@ const Header = () => {
         <div className="absolute inset-0 bg-black/60" />
         
         <div className="relative z-10 max-w-7xl mx-auto flex justify-between items-center text-sm">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center justify-between sm:justify-start space-x-3">
             <div className="flex items-center space-x-1">
               <Phone className="h-4 w-4" />
               <span className="hidden sm:inline">+254 700 123 456</span>
@@ -411,7 +428,7 @@ const Header = () => {
           </div>
           
           {/* Rotating Promo Messages */}
-          <div className="flex-1 flex justify-center items-center space-x-2">
+          <div className="flex-1 flex justify-center items-center space-x-2 text-center text-[11px] sm:text-xs">
             <Zap className="h-4 w-4 animate-pulse text-yellow-300" />
             <Link href={promoSlides[currentSlide].link} className="hover:underline font-semibold">
               {promoSlides[currentSlide].text}
@@ -432,10 +449,10 @@ const Header = () => {
 
       {/* Main Header */}
       <header className="bg-white shadow-md sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
+          <div className="flex flex-wrap items-center justify-between gap-3 h-auto py-3">
             {/* Toggle Menu Button & Logo */}
-            <div className="flex items-center space-x-4 py-2">
+            <div className="flex items-center space-x-3 py-1">
               {/* Category Menu Toggle Button */}
               <Button
                 ref={categoryButtonRef}
@@ -453,13 +470,13 @@ const Header = () => {
               </Button>
 
               {/* Logo */}
-              <Link href="/" className="flex items-center space-x-3">
+              <Link href="/" className="flex items-center space-x-2">
                 <Image
                   src="/fasthub-logo.jpg"
                   alt="FastHub Computers"
-                  width={160}
-                  height={60}
-                  className="h-14 w-auto"
+                  width={140}
+                  height={50}
+                  className="h-10 sm:h-14 w-auto"
                 />
                 <div className="hidden sm:flex flex-col leading-tight">
                   <span className="text-2xl font-bold text-orange-600">FastHub</span>

@@ -203,7 +203,7 @@ const EnhancedAdminLayout = ({ children }: { children: React.ReactNode }) => {
         </header>
 
         {/* Page content */}
-        <main className='p-12'>
+        <main className='p-4 sm:p-6 lg:p-12'>
           {children}
         </main>
 

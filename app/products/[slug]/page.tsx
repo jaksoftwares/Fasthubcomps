@@ -200,16 +200,16 @@ const ProductDetailPage = () => {
 						</div>
 					</div>
 
-					{/* Product Info & Description Combined */}
-					<div className="lg:col-span-8 space-y-3">
-						{/* Product Title & Basic Info */}
-						<div>
-							<div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
-								<span className="uppercase">{product.brand}</span>
-							</div>
-							<h1 className="text-xl font-bold text-gray-900 mb-2">{product.name}</h1>
-							<div className="flex items-center gap-3 mb-2">
-								<div className="flex items-center">
+						{/* Product Info & Description Combined */}
+						<div className="lg:col-span-8 space-y-3">
+							{/* Product Title & Basic Info */}
+							<div>
+								<div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
+									<span className="uppercase">{product.brand}</span>
+								</div>
+								<h1 className="text-xl font-bold text-gray-900 mb-2 sm:mb-3 break-words">{product.name}</h1>
+								<div className="flex flex-wrap items-center gap-3 mb-2">
+									<div className="flex items-center">
 									{[...Array(5)].map((_, i) => (
 										<Star
 											key={i}
@@ -221,79 +221,82 @@ const ProductDetailPage = () => {
 										/>
 									))}
 								</div>
-								<span className="text-xs text-gray-600">
-									{product.rating} ({product.reviewCount})
-								</span>
-								<div className="flex items-center gap-2 ml-auto">
-									<div className={`w-2 h-2 rounded-full ${product.stock > 0 ? 'bg-green-500' : 'bg-red-500'}`}></div>
-									<span className={`text-xs font-medium ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
-										{product.stock > 0 ? `${product.stock} in stock` : 'Out of Stock'}
-									</span>
+										<span className="text-xs text-gray-600">
+											{product.rating} ({product.reviewCount})
+										</span>
+										<div className="flex items-center gap-2">
+											<div className={`w-2 h-2 rounded-full ${product.stock > 0 ? 'bg-green-500' : 'bg-red-500'}`}></div>
+											<span className={`text-xs font-medium ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
+												{product.stock > 0 ? `${product.stock} in stock` : 'Out of Stock'}
+											</span>
+										</div>
+									</div>
 								</div>
 							</div>
-						</div>
 
-						{/* Pricing & Actions Combined */}
-						<div className="bg-gray-50 p-3 rounded-lg">
-							<div className="flex items-center justify-between">
-								<div>
-									<div className="flex items-baseline gap-2">
-										<span className="text-2xl font-bold text-gray-900">
-											{formatPrice(product.price)}
-										</span>
-										{product.old_price && product.old_price > product.price && (
-											<span className="text-sm text-gray-500 line-through">
-												{formatPrice(product.old_price)}
+							{/* Pricing & Actions Combined */}
+							<div className="bg-gray-50 p-3 rounded-lg">
+								<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+									<div>
+										<div className="flex items-baseline gap-2">
+											<span className="text-2xl font-bold text-gray-900">
+												{formatPrice(product.price)}
 											</span>
+											{product.old_price && product.old_price > product.price && (
+												<span className="text-sm text-gray-500 line-through">
+													{formatPrice(product.old_price)}
+												</span>
+											)}
+										</div>
+										{discountPercentage > 0 && (
+											<p className="text-xs text-green-600 font-medium">
+												Save {formatPrice(product.old_price! - product.price)} ({discountPercentage}% off)
+											</p>
 										)}
 									</div>
-									{discountPercentage > 0 && (
-										<p className="text-xs text-green-600 font-medium">
-											Save {formatPrice(product.old_price! - product.price)} ({discountPercentage}% off)
-										</p>
-									)}
-								</div>
-								<div className="flex items-center gap-2">
-									<div className="flex items-center border rounded-md">
-										<button
-											onClick={() => setQuantity(Math.max(1, quantity - 1))}
-											className="px-2 py-1 hover:bg-gray-100 text-sm"
-										>
-											-
-										</button>
-										<span className="px-3 py-1 border-x text-sm font-medium">{quantity}</span>
-										<button
-											onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-											className="px-2 py-1 hover:bg-gray-100 text-sm"
-										>
-											+
-										</button>
+									<div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+										<div className="flex items-center border rounded-md w-full sm:w-auto justify-between sm:justify-start">
+											<button
+												onClick={() => setQuantity(Math.max(1, quantity - 1))}
+												className="px-3 py-1 hover:bg-gray-100 text-sm"
+											>
+												-
+											</button>
+											<span className="px-4 py-1 border-x text-sm font-medium min-w-[2.5rem] text-center">{quantity}</span>
+											<button
+												onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+												className="px-3 py-1 hover:bg-gray-100 text-sm"
+											>
+												+
+											</button>
+										</div>
+										<div className="flex flex-wrap gap-2 w-full sm:w-auto">
+											<Button
+												onClick={handleAddToCart}
+												disabled={product.stock === 0}
+												className="bg-orange-600 hover:bg-orange-700 text-white text-sm px-4 flex-1 sm:flex-none"
+											>
+												<ShoppingCart className="h-4 w-4 mr-1" />
+												Add to Cart
+											</Button>
+											<Button
+												variant={isWishlisted ? "default" : "outline"}
+												onClick={handleWishlist}
+												className="px-3"
+												size="sm"
+											>
+												<Heart className={`h-4 w-4 ${isWishlisted ? 'fill-current' : ''}`} />
+											</Button>
+											<Button variant="outline" onClick={handleShare} className="px-3" size="sm">
+												<Share2 className="h-4 w-4" />
+											</Button>
+										</div>
 									</div>
-									<Button
-										onClick={handleAddToCart}
-										disabled={product.stock === 0}
-										className="bg-orange-600 hover:bg-orange-700 text-white text-sm px-4"
-									>
-										<ShoppingCart className="h-4 w-4 mr-1" />
-										Add to Cart
-									</Button>
-									<Button
-										variant={isWishlisted ? "default" : "outline"}
-										onClick={handleWishlist}
-										className="px-3"
-										size="sm"
-									>
-										<Heart className={`h-4 w-4 ${isWishlisted ? 'fill-current' : ''}`} />
-									</Button>
-									<Button variant="outline" onClick={handleShare} className="px-3" size="sm">
-										<Share2 className="h-4 w-4" />
-									</Button>
 								</div>
 							</div>
-						</div>
 
-						{/* Description & Specs in 2 columns */}
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+							{/* Description & Specs in 2 columns */}
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
 							{/* Description */}
 							<div className="bg-white p-3 rounded-lg shadow-sm">
 								<h2 className="text-xs font-semibold text-gray-900 mb-1.5 uppercase">Description</h2>
@@ -365,7 +368,7 @@ const ProductDetailPage = () => {
 						</div>
 
 						{/* Service Features - Compact */}
-						<div className="grid grid-cols-2 gap-2">
+						<div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
 							<div className="flex items-center gap-2 p-2 bg-blue-50 rounded-md">
 								<Truck className="h-4 w-4 text-blue-600 flex-shrink-0" />
 								<div>
@@ -381,7 +384,6 @@ const ProductDetailPage = () => {
 								</div>
 							</div>
 						</div>
-					</div>
 				</div>
 
 				{/* Related Products Section */}
