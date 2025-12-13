@@ -35,9 +35,23 @@ const Footer = () => {
               Unlocking your IT needs with quality computers, laptops, phones, and professional repair services.
             </p>
             <div className="flex space-x-4">
+              <Link
+                href="https://x.com/fasthubcomps"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="FastHub on X"
+              >
+                <Twitter className="h-5 w-5 text-gray-400 hover:text-orange-500 transition-colors cursor-pointer" />
+              </Link>
+              <Link
+                href="https://www.tiktok.com/@fasthubcomps"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="FastHub on TikTok"
+              >
+                <Instagram className="h-5 w-5 text-gray-400 hover:text-orange-500 transition-colors cursor-pointer" />
+              </Link>
               <Facebook className="h-5 w-5 text-gray-400 hover:text-orange-500 transition-colors cursor-pointer" />
-              <Twitter className="h-5 w-5 text-gray-400 hover:text-orange-500 transition-colors cursor-pointer" />
-              <Instagram className="h-5 w-5 text-gray-400 hover:text-orange-500 transition-colors cursor-pointer" />
               <Youtube className="h-5 w-5 text-gray-400 hover:text-orange-500 transition-colors cursor-pointer" />
             </div>
           </div>

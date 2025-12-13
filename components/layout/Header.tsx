@@ -439,9 +439,22 @@ const Header = () => {
           <div className="hidden lg:flex items-center space-x-2">
             <span className="text-xs">Follow Us:</span>
             <div className="flex space-x-2">
-              <a href="#" className="hover:text-blue-200 transition-colors">FB</a>
-              <a href="#" className="hover:text-blue-200 transition-colors">TW</a>
-              <a href="#" className="hover:text-blue-200 transition-colors">IG</a>
+              <a
+                href="https://x.com/fasthubcomps"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-blue-200 transition-colors"
+              >
+                X
+              </a>
+              <a
+                href="https://www.tiktok.com/@fasthubcomps"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-blue-200 transition-colors"
+              >
+                TikTok
+              </a>
             </div>
           </div>
         </div>
