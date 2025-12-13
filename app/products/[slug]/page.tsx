@@ -192,6 +192,10 @@ const ProductDetailPage = () => {
 		? Math.round(((product.old_price - product.price) / product.old_price) * 100)
 		: 0;
 
+	// Normalize rating values for consistent display
+	const ratingValue: number = typeof product.rating === 'number' && product.rating > 0 ? product.rating : 4.5;
+	const reviewCount: number = typeof product.reviewCount === 'number' && product.reviewCount >= 0 ? product.reviewCount : 0;
+
 	const categoryId = product.category_id || product.category || 'Category';
 	let categoryName = 'Category';
 	if (categoryId) {
@@ -266,7 +270,7 @@ const ProductDetailPage = () => {
 										<Star
 											key={i}
 											className={`h-4 w-4 ${
-												i < Math.floor(product.rating)
+												i < Math.floor(ratingValue)
 													? 'text-yellow-400 fill-current'
 													: 'text-gray-300'
 											}`}
@@ -274,7 +278,7 @@ const ProductDetailPage = () => {
 									))}
 								</div>
 								<span className="text-xs text-gray-600">
-									{product.rating} ({product.reviewCount} reviews)
+									{ratingValue.toFixed(1)} ({reviewCount} reviews)
 								</span>
 								<div className="flex items-center gap-1.5">
 									<div className={`w-2 h-2 rounded-full ${product.stock > 0 ? 'bg-green-500' : 'bg-red-500'}`}></div>
@@ -478,22 +482,12 @@ const ImageMagnifier = ({ src, alt, discount }: { src: string; alt: string; disc
 
 // Tabs Component for Description, Specs, and Warranty
 const Tabs = ({ productDescription, shortSpecs, warranty }: { productDescription: string; shortSpecs?: string; warranty?: string }) => {
-	const [activeTab, setActiveTab] = useState('description');
+	const [activeTab, setActiveTab] = useState(shortSpecs ? 'specs' : 'description');
 
 	return (
 		<div>
 			<div className="border-b border-gray-200">
 				<div className="flex overflow-x-auto">
-					<button
-						onClick={() => setActiveTab('description')}
-						className={`px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
-							activeTab === 'description'
-								? 'border-orange-500 text-orange-600'
-								: 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
-						}`}
-					>
-						Description
-					</button>
 					{shortSpecs && (
 						<button
 							onClick={() => setActiveTab('specs')}
@@ -506,6 +500,16 @@ const Tabs = ({ productDescription, shortSpecs, warranty }: { productDescription
 							Specifications
 						</button>
 					)}
+					<button
+						onClick={() => setActiveTab('description')}
+						className={`px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+							activeTab === 'description'
+								? 'border-orange-500 text-orange-600'
+								: 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+						}`}
+					>
+						Description
+					</button>
 					{warranty && (
 						<button
 							onClick={() => setActiveTab('warranty')}
