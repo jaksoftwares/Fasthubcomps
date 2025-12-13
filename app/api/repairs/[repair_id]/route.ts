@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
@@ -9,8 +9,11 @@ const supabase = createClient(
 // =======================================
 // GET /api/repairs/[repair_id]
 // =======================================
-export async function GET(_: Request, { params }: { params: { repair_id: string } }) {
-  const { repair_id } = params;
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ repair_id: string }> }
+) {
+  const { repair_id } = await params;
 
   const { data, error } = await supabase.from("repair_requests").select("*").eq("id", repair_id).single();
 
@@ -27,8 +30,11 @@ export async function GET(_: Request, { params }: { params: { repair_id: string 
 // =======================================
 // PATCH /api/repairs/[repair_id]
 // =======================================
-export async function PATCH(req: Request, { params }: { params: { repair_id: string } }) {
-  const { repair_id } = params;
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ repair_id: string }> }
+) {
+  const { repair_id } = await params;
   const updates = await req.json();
 
   const allowedFields = [
@@ -63,8 +69,11 @@ export async function PATCH(req: Request, { params }: { params: { repair_id: str
 // =======================================
 // DELETE /api/repairs/[repair_id]
 // =======================================
-export async function DELETE(_: Request, { params }: { params: { repair_id: string } }) {
-  const { repair_id } = params;
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ repair_id: string }> }
+) {
+  const { repair_id } = await params;
 
   const { error } = await supabase.from("repair_requests").delete().eq("id", repair_id);
 

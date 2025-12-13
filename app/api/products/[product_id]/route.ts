@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
@@ -7,7 +7,7 @@ const supabase = createClient(
 );
 
 export async function GET(
-  _req: Request,
+  _request: NextRequest,
   context: { params: Promise<{ product_id: string }> }
 ) {
   try {
@@ -26,11 +26,11 @@ export async function GET(
 }
 
 export async function PATCH(
-  req: Request,
+  request: NextRequest,
   context: { params: Promise<{ product_id: string }> }
 ) {
   try {
-    const body = await req.json();
+    const body = await request.json();
     const { product_id } = await context.params;
     const { data, error } = await supabase
       .from("products")
@@ -47,7 +47,7 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _req: Request,
+  _request: NextRequest,
   context: { params: Promise<{ product_id: string }> }
 ) {
   try {

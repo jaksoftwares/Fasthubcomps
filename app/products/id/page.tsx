@@ -33,8 +33,14 @@ const ProductDetailPage = () => {
       setLoading(true);
       setError(null);
       try {
-      	const data = await ProductsAPI.get(productId);
-      	setProduct(data);
+        // Ensure productId is a string before calling the API
+        if (typeof productId !== 'string') {
+          setError('Invalid product ID');
+          setLoading(false);
+          return;
+        }
+        const data = await ProductsAPI.get(productId);
+        setProduct(data);
       } catch (err: any) {
         setError(err?.message || 'Failed to fetch product');
       } finally {
