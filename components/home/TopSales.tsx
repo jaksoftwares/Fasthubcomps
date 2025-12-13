@@ -10,33 +10,42 @@ import { Star, ShoppingCart, TrendingUp } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { ProductsAPI } from '@/lib/services/products';
 
-const TopSales = () => {
+interface TopSalesProps {
+  initialProducts?: any[];
+}
+
+const TopSales: React.FC<TopSalesProps> = ({ initialProducts = [] }) => {
   const { addItem } = useCart();
-  const [topSalesProducts, setTopSalesProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const deriveTopSales = (source: any[]) =>
+    Array.isArray(source)
+      ? source
+          .map(p => ({
+            ...p,
+            image:
+              Array.isArray(p.images) && p.images.length > 0
+                ? p.images[0]
+                : '/placeholder.png',
+            salesCount: p.salesCount || p.stock || 0,
+            rating: p.rating || 4.5,
+            reviews: p.reviews || 0,
+          }))
+          .sort((a, b) => (b.salesCount || 0) - (a.salesCount || 0))
+          .slice(0, 18)
+      : [];
+
+  const [topSalesProducts, setTopSalesProducts] = useState<any[]>(() => deriveTopSales(initialProducts));
+  const [loading, setLoading] = useState(topSalesProducts.length === 0);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (topSalesProducts.length > 0) return;
+
     const fetchTopSales = async () => {
       setLoading(true);
       setError(null);
       try {
         const data = await ProductsAPI.getAll();
-        const topSales = Array.isArray(data)
-          ? data
-              .map(p => ({
-                ...p,
-                image:
-                  Array.isArray(p.images) && p.images.length > 0
-                    ? p.images[0]
-                    : '/placeholder.png',
-                salesCount: p.salesCount || p.stock || 0,
-                rating: p.rating || 4.5,
-                reviews: p.reviews || 0,
-              }))
-              .sort((a, b) => (b.salesCount || 0) - (a.salesCount || 0))
-              .slice(0, 18) // Show 18 products for 6x3 grid
-          : [];
+        const topSales = deriveTopSales(data);
         setTopSalesProducts(topSales);
       } catch (err: any) {
         setError(err?.message || 'Failed to fetch top sales');
@@ -45,7 +54,7 @@ const TopSales = () => {
       }
     };
     fetchTopSales();
-  }, []);
+  }, [topSalesProducts.length]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-KE', {

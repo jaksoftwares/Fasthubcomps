@@ -11,38 +11,47 @@ import { useCart } from '@/contexts/CartContext';
 import { ProductsAPI } from '@/lib/services/products';
 import { motion } from 'framer-motion';
 
-const BestDeals = () => {
+interface BestDealsProps {
+  initialProducts?: any[];
+}
+
+const BestDeals: React.FC<BestDealsProps> = ({ initialProducts = [] }) => {
   const { addItem } = useCart();
-  const [bestDeals, setBestDeals] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const deriveDeals = (source: any[]) =>
+    Array.isArray(source)
+      ? source
+          .filter(p => {
+            const tags = Array.isArray(p.tags) ? p.tags : [];
+            return tags.includes('best-deals');
+          })
+          .map(p => ({
+            ...p,
+            discount:
+              p.original_price && p.price
+                ? Math.round(((p.original_price - p.price) / p.original_price) * 100)
+                : 0,
+            image: Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : '/placeholder.png',
+            timeLeft: 'Limited',
+            rating: p.rating || 4.5,
+            reviews: p.reviews || 0,
+          }))
+          .slice(0, 18)
+      : [];
+
+  const [bestDeals, setBestDeals] = useState<any[]>(() => deriveDeals(initialProducts));
+  const [loading, setLoading] = useState(bestDeals.length === 0);
   const [error, setError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (bestDeals.length > 0) return;
+
     const fetchDeals = async () => {
       setLoading(true);
       setError(null);
       try {
         const data = await ProductsAPI.getAll();
-        const deals = Array.isArray(data)
-          ? data
-              .filter(p => {
-                const tags = Array.isArray(p.tags) ? p.tags : [];
-                return tags.includes('best-deals');
-              })
-              .map(p => ({
-                ...p,
-                discount:
-                  p.original_price && p.price
-                    ? Math.round(((p.original_price - p.price) / p.original_price) * 100)
-                    : 0,
-                image: Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : '/placeholder.png',
-                timeLeft: 'Limited',
-                rating: p.rating || 4.5,
-                reviews: p.reviews || 0,
-              }))
-              .slice(0, 18) // Show 18 tagged products
-          : [];
+        const deals = deriveDeals(data);
         setBestDeals(deals);
       } catch (err: any) {
         setError(err?.message || 'Failed to fetch deals');
@@ -51,7 +60,7 @@ const BestDeals = () => {
       }
     };
     fetchDeals();
-  }, []);
+  }, [bestDeals.length]);
 
   // Gentle auto-scroll for the horizontal list, but still
   // allows the user to manually scroll.

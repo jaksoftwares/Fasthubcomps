@@ -10,32 +10,41 @@ import { Star, ShoppingCart, Heart, Eye, TrendingUp, ChevronLeft, ChevronRight }
 import { useCart } from '@/contexts/CartContext';
 import { ProductsAPI } from '@/lib/services/products';
 
-const FeaturedProducts = () => {
+interface FeaturedProductsProps {
+  initialProducts?: any[];
+}
+
+const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ initialProducts = [] }) => {
   const { addItem } = useCart();
-  const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const deriveFeatured = (source: any[]) =>
+    Array.isArray(source)
+      ? source
+          .map(p => ({
+            ...p,
+            image: Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : '/placeholder.png',
+            badge: p.badge || 'Featured',
+            rating: p.rating || 4.5,
+            reviews: p.reviews || 0,
+          }))
+          .sort((a, b) => (b.rating || 0) - (a.rating || 0))
+          .slice(0, 18)
+      : [];
+
+  const [featuredProducts, setFeaturedProducts] = useState<any[]>(() => deriveFeatured(initialProducts));
+  const [loading, setLoading] = useState(featuredProducts.length === 0);
   const [error, setError] = useState<string | null>(null);
   const [wishlist, setWishlist] = useState<Set<string>>(new Set());
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (featuredProducts.length > 0) return;
+
     const fetchFeatured = async () => {
       setLoading(true);
       setError(null);
       try {
         const data = await ProductsAPI.getAll();
-        const featured = Array.isArray(data)
-          ? data
-              .map(p => ({
-                ...p,
-                image: Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : '/placeholder.png',
-                badge: p.badge || 'Featured',
-                rating: p.rating || 4.5,
-                reviews: p.reviews || 0,
-              }))
-              .sort((a, b) => (b.rating || 0) - (a.rating || 0))
-              .slice(0, 18) // Show 18 products for 6x3 grid
-          : [];
+        const featured = deriveFeatured(data);
         setFeaturedProducts(featured);
       } catch (err: any) {
         setError(err?.message || 'Failed to fetch featured products');
@@ -44,7 +53,7 @@ const FeaturedProducts = () => {
       }
     };
     fetchFeatured();
-  }, []);
+  }, [featuredProducts.length]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-KE', {

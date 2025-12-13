@@ -31,27 +31,36 @@ const CATEGORY_SLUG_TO_ID: Record<string, string> = {
   gaming: "1ba300ed-82f9-4c3e-8cfc-961f684a4cd5",
 };
 
-const CategoryStrips = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+interface CategoryStripsProps {
+  initialProducts?: any[];
+}
+
+const CategoryStrips: React.FC<CategoryStripsProps> = ({ initialProducts = [] }) => {
+  const mapProducts = (data: any[]): Product[] =>
+    Array.isArray(data)
+      ? data.map((p: any) => ({
+          id: p.id || "",
+          slug: p.slug || p.id || "",
+          name: p.name || "",
+          price: Number(p.price) || 0,
+          images: Array.isArray(p.images) ? p.images : ["/placeholder.png"],
+          category: p.category_id || p.category || "",
+        }))
+      : [];
+
+  const [products, setProducts] = useState<Product[]>(() => mapProducts(initialProducts));
+  const [loading, setLoading] = useState(products.length === 0);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (products.length > 0) return;
+
     const fetchProducts = async () => {
       setLoading(true);
       setError(null);
       try {
         const data = await ProductsAPI.getAll();
-        const mapped: Product[] = Array.isArray(data)
-          ? data.map((p: any) => ({
-              id: p.id || "",
-              slug: p.slug || p.id || "",
-              name: p.name || "",
-              price: Number(p.price) || 0,
-              images: Array.isArray(p.images) ? p.images : ["/placeholder.png"],
-              category: p.category_id || p.category || "",
-            }))
-          : [];
+        const mapped: Product[] = mapProducts(data);
         setProducts(mapped);
       } catch (err: any) {
         setError(err?.message || "Failed to load category products");
@@ -59,9 +68,8 @@ const CategoryStrips = () => {
         setLoading(false);
       }
     };
-
     fetchProducts();
-  }, []);
+  }, [products.length]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-KE", {
