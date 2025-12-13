@@ -6,6 +6,7 @@ import { CartProvider } from '@/contexts/CartContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { AuthModalProvider } from '@/contexts/AuthModalContext';
 import { WishlistProvider } from '@/contexts/WishlistContext';
+import { MessageCircle } from 'lucide-react';
 
 // 👇 Place the font files inside: app/fonts/
 const inter = localFont({
@@ -45,6 +46,16 @@ export default function RootLayout({
             <CartProvider>
               <WishlistProvider>
                 {children}
+                {/* Global WhatsApp Contact Button */}
+                <a
+                  href="https://wa.me/254715242502"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="fixed bottom-4 right-4 z-50 flex items-center justify-center w-12 h-12 rounded-full bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/40 transition-all md:bottom-6 md:right-6"
+                  aria-label="Chat with us on WhatsApp"
+                >
+                  <MessageCircle className="h-6 w-6" />
+                </a>
                 <Toaster />
               </WishlistProvider>
             </CartProvider>

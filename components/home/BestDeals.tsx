@@ -24,17 +24,29 @@ const BestDeals: React.FC<BestDealsProps> = ({ initialProducts = [] }) => {
             const tags = Array.isArray(p.tags) ? p.tags : [];
             return tags.includes('best-deals');
           })
-          .map(p => ({
-            ...p,
-            discount:
-              p.original_price && p.price
-                ? Math.round(((p.original_price - p.price) / p.original_price) * 100)
-                : 0,
-            image: Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : '/placeholder.png',
-            timeLeft: 'Limited',
-            rating: p.rating || 4.5,
-            reviews: p.reviews || 0,
-          }))
+          .map(p => {
+            const price = Number(p.price);
+            const rawOriginal = p.old_price ?? p.original_price;
+            const originalPrice = rawOriginal != null ? Number(rawOriginal) : null;
+            const hasValidPrices = typeof price === 'number' && !Number.isNaN(price) &&
+              typeof originalPrice === 'number' && !Number.isNaN(originalPrice) &&
+              originalPrice > price;
+
+            const discount = hasValidPrices
+              ? Math.round(((originalPrice! - price) / originalPrice!) * 100)
+              : 0;
+
+            return {
+              ...p,
+              price,
+              original_price: hasValidPrices ? originalPrice : null,
+              discount,
+              image: Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : '/placeholder.png',
+              timeLeft: 'Limited',
+              rating: p.rating || 4.5,
+              reviews: p.reviews || 0,
+            };
+          })
           .slice(0, 18)
       : [];
 
@@ -84,12 +96,14 @@ const BestDeals: React.FC<BestDealsProps> = ({ initialProducts = [] }) => {
     return () => clearInterval(interval);
   }, [bestDeals.length]);
 
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat('en-KE', {
+  const formatPrice = (price: number | null | undefined) => {
+    const value = typeof price === 'number' && !Number.isNaN(price) ? price : 0;
+    return new Intl.NumberFormat('en-KE', {
       style: 'currency',
       currency: 'KES',
       minimumFractionDigits: 0,
-    }).format(price);
+    }).format(value);
+  };
 
   const handleAddToCart = (product: any) => {
     addItem({
@@ -194,13 +208,21 @@ const BestDeals: React.FC<BestDealsProps> = ({ initialProducts = [] }) => {
                           <span className="text-sm font-bold text-red-600">
                             {formatPrice(product.price)}
                           </span>
-                          <span className="text-xs text-gray-500 line-through">
-                            {formatPrice(product.original_price)}
-                          </span>
+                          {typeof product.original_price === 'number' &&
+                            !Number.isNaN(product.original_price) &&
+                            product.original_price > product.price && (
+                              <span className="text-xs text-gray-500 line-through">
+                                {formatPrice(product.original_price)}
+                              </span>
+                            )}
                         </div>
-                        <div className="text-xs text-green-600 font-medium">
-                          Save {formatPrice(product.original_price - product.price)}
-                        </div>
+                        {typeof product.original_price === 'number' &&
+                          !Number.isNaN(product.original_price) &&
+                          product.original_price > product.price && (
+                            <div className="text-xs text-green-600 font-medium">
+                              Save {formatPrice(product.original_price - product.price)}
+                            </div>
+                          )}
                       </div>
 
                       {/* Compact CTA */}

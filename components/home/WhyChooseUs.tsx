@@ -122,10 +122,10 @@ const WhyChooseUs = () => {
               Contact Us
             </a>
             <a 
-              href="tel:+254712345678" 
+              href="tel:+254715242502" 
               className="inline-flex items-center justify-center px-8 py-4 bg-white hover:bg-gray-50 text-gray-900 font-semibold rounded-lg transition-all shadow-md hover:shadow-lg border border-gray-200"
             >
-              Call: +254 712 345 678
+              Call: +254 715 242 502
             </a>
           </div>
         </div>

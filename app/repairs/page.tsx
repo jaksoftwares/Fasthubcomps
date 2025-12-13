@@ -320,37 +320,28 @@ const RepairsPage = () => {
             {/* Contact Information */}
             <Card>
               <CardHeader>
-                <CardTitle>Contact Information</CardTitle>
+                <CardTitle>Contact & Location</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <Phone className="h-5 w-5 text-blue-600" />
-                  <div>
-                    <p className="font-medium">Phone</p>
-                    <p className="text-gray-600">+254 700 123 456</p>
+              <CardContent>
+                <div className="space-y-4 text-sm text-gray-700">
+                  <div className="flex items-center space-x-2">
+                    <Phone className="h-4 w-4 text-blue-600" />
+                    <span>+254 715 242502</span>
                   </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Mail className="h-5 w-5 text-blue-600" />
-                  <div>
-                    <p className="font-medium">Email</p>
-                    <p className="text-gray-600">repairs@fasthub.co.ke</p>
+                  <div className="flex items-center space-x-2">
+                    <Mail className="h-4 w-4 text-blue-600" />
+                    <span>info@fasthub.co.ke</span>
                   </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <MapPin className="h-5 w-5 text-blue-600" />
-                  <div>
-                    <p className="font-medium">Location</p>
-                    <p className="text-gray-600">123 Tech Street, Nairobi, Kenya</p>
+                  <div className="flex items-start space-x-2">
+                    <MapPin className="h-4 w-4 text-blue-600 mt-0.5" />
+                    <span>fasthub.co.ke • Nairobi CBD, Kenya</span>
                   </div>
-                </div>
-                <div className="pt-4 border-t">
-                  <p className="font-medium mb-2">Business Hours</p>
-                  <p className="text-gray-600 text-sm">
-                    Monday - Friday: 8:00 AM - 6:00 PM<br />
-                    Saturday: 9:00 AM - 4:00 PM<br />
-                    Sunday: Closed
-                  </p>
+                  <div>
+                    <p className="font-medium">Working Hours</p>
+                    <p>Monday - Friday: 9:00am - 6:00pm</p>
+                    <p>Saturday: 10:00am - 4:00pm</p>
+                    <p>Sunday: Closed</p>
+                  </div>
                 </div>
               </CardContent>
             </Card>

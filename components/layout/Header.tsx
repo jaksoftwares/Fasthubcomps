@@ -419,7 +419,7 @@ const Header = () => {
           <div className="flex items-center justify-between sm:justify-start space-x-3">
             <div className="flex items-center space-x-1">
               <Phone className="h-4 w-4" />
-              <span className="hidden sm:inline">+254 700 123 456</span>
+              <span className="hidden sm:inline">+254 715 242 502</span>
             </div>
             <div className="flex items-center space-x-1">
               <Mail className="h-4 w-4" />
