@@ -188,6 +188,17 @@ const ProductDetailPage = () => {
 		}
 	};
 
+	const handleWhatsAppOrder = () => {
+		try {
+			const url = typeof window !== 'undefined' ? window.location.href : '';
+			const message = `Hello FastHub Computers, I would like to order this product: ${product.name}. Here is the link: ${url}`;
+			const waUrl = `https://wa.me/254715242502?text=${encodeURIComponent(message)}`;
+			window.open(waUrl, '_blank');
+		} catch {
+			toast.error('Could not open WhatsApp.');
+		}
+	};
+
 	const discountPercentage = product.old_price 
 		? Math.round(((product.old_price - product.price) / product.old_price) * 100)
 		: 0;
@@ -350,6 +361,14 @@ const ProductDetailPage = () => {
 								<Button variant="outline" onClick={handleShare} className="flex-1 py-2.5 h-auto text-sm">
 									<Share2 className="h-4 w-4 mr-1.5" />
 									Share
+								</Button>
+								<Button
+									variant="outline"
+									onClick={handleWhatsAppOrder}
+									className="flex-1 py-2.5 h-auto text-sm border-[#25D366] text-[#25D366] hover:bg-[#25D366]/10"
+								>
+									<span className="mr-1.5">💬</span>
+									Order via WhatsApp
 								</Button>
 							</div>
 						</div>

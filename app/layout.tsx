@@ -48,7 +48,7 @@ export default function RootLayout({
                 {children}
                 {/* Global WhatsApp Contact Button */}
                 <a
-                  href="https://wa.me/254715242502"
+                  href="https://wa.me/254715242502?text=Hello%20FastHub%20Computers%2C%20I%20would%20like%20to%20inquire%20about%20your%20products%20and%20services."
                   target="_blank"
                   rel="noopener noreferrer"
                   className="fixed bottom-4 right-4 z-50 flex items-center justify-center w-12 h-12 rounded-full bg-[#25D366] hover:bg-[#1ebe5d] text-white shadow-lg shadow-[#25D366]/40 transition-all md:bottom-6 md:right-6"
