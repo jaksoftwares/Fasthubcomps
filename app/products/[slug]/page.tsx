@@ -18,7 +18,6 @@ import { useWishlist } from '@/contexts/WishlistContext';
 
 const ProductDetailPage = () => {
 	const params = useParams();
-	// Ensure slug is treated as a string for TypeScript while still handling array params
 	const rawSlug = (params as any).slug;
 	const slug = (Array.isArray(rawSlug) ? rawSlug[0] : rawSlug) as string;
 	const { addItem } = useCart();
@@ -53,7 +52,7 @@ const ProductDetailPage = () => {
 				const data = await res.json();
 				setCategories(Array.isArray(data) ? data : []);
 			} catch {
-				// fail silently; breadcrumb will fall back to raw id
+				// fail silently
 			}
 		};
 		fetchCategories();
@@ -133,7 +132,6 @@ const ProductDetailPage = () => {
 		? Math.round(((product.old_price - product.price) / product.old_price) * 100)
 		: 0;
 
-	// Normalize some DB-backed fields for display
 	const categoryId = product.category_id || product.category || 'Category';
 	let categoryName = 'Category';
 	if (categoryId) {
@@ -144,7 +142,6 @@ const ProductDetailPage = () => {
 	const tags: string[] = Array.isArray(product.tags) ? product.tags : [];
 	const flags: string[] = Array.isArray(product.flags) ? product.flags : [];
 
-	// Generate breadcrumb items
 	const breadcrumbItems = [
 		{ label: 'Home', href: '/' },
 		{ label: 'Products', href: '/products' },
@@ -157,26 +154,29 @@ const ProductDetailPage = () => {
 			<Header />
 			<Breadcrumb items={breadcrumbItems} />
 			
-			<main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-				<div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-					{/* Product Images - Much Smaller */}
-					<div className="lg:col-span-4">
-						<div className="sticky top-24">
-							<div className="relative w-full h-64 md:h-80 bg-white rounded-lg overflow-hidden shadow-sm">
+			<main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
+				{/* Main Product Section */}
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 mb-8">
+					{/* Left Column - Product Images */}
+					<div className="lg:sticky lg:top-24 lg:self-start">
+						<div className="bg-white rounded-lg shadow-sm overflow-hidden">
+							<div className="relative w-full aspect-square">
 								<Image
 									src={images[selectedImage] || '/placeholder.png'}
 									alt={product.name}
 									fill
-									className="object-contain p-4"
+									className="object-contain p-4 md:p-8"
+									priority
 								/>
 								{discountPercentage > 0 && (
-									<Badge className="absolute top-3 left-3 bg-red-500 text-white text-xs">
+									<Badge className="absolute top-4 left-4 bg-red-500 text-white text-sm px-3 py-1">
 										-{discountPercentage}%
 									</Badge>
 								)}
 							</div>
+							
 							{images.length > 1 && (
-								<div className="flex gap-2 mt-3 overflow-x-auto">
+								<div className="flex gap-2 p-4 overflow-x-auto">
 									{images.map((image: string, index: number) => (
 										<button
 											key={index}
@@ -189,9 +189,9 @@ const ProductDetailPage = () => {
 											<Image
 												src={image || '/placeholder.png'}
 												alt={`${product.name} ${index + 1}`}
-												width={50}
-												height={50}
-												className="object-cover w-12 h-12"
+												width={80}
+												height={80}
+												className="object-cover w-16 h-16 md:w-20 md:h-20"
 											/>
 										</button>
 									))}
@@ -200,20 +200,21 @@ const ProductDetailPage = () => {
 						</div>
 					</div>
 
-						{/* Product Info & Description Combined */}
-						<div className="lg:col-span-8 space-y-3">
-							{/* Product Title & Basic Info */}
-							<div>
-								<div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
-									<span className="uppercase">{product.brand}</span>
-								</div>
-								<h1 className="text-xl font-bold text-gray-900 mb-2 sm:mb-3 break-words">{product.name}</h1>
-								<div className="flex flex-wrap items-center gap-3 mb-2">
-									<div className="flex items-center">
+					{/* Right Column - Product Info */}
+					<div className="space-y-6">
+						{/* Title and Rating */}
+						<div>
+							<div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
+								<span className="uppercase font-medium">{product.brand}</span>
+								{model && <span>• {model}</span>}
+							</div>
+							<h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">{product.name}</h1>
+							<div className="flex flex-wrap items-center gap-4 mb-3">
+								<div className="flex items-center">
 									{[...Array(5)].map((_, i) => (
 										<Star
 											key={i}
-											className={`h-3 w-3 ${
+											className={`h-5 w-5 ${
 												i < Math.floor(product.rating)
 													? 'text-yellow-400 fill-current'
 													: 'text-gray-300'
@@ -221,174 +222,197 @@ const ProductDetailPage = () => {
 										/>
 									))}
 								</div>
-										<span className="text-xs text-gray-600">
-											{product.rating} ({product.reviewCount})
-										</span>
-										<div className="flex items-center gap-2">
-											<div className={`w-2 h-2 rounded-full ${product.stock > 0 ? 'bg-green-500' : 'bg-red-500'}`}></div>
-											<span className={`text-xs font-medium ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
-												{product.stock > 0 ? `${product.stock} in stock` : 'Out of Stock'}
-											</span>
-										</div>
-									</div>
+								<span className="text-sm text-gray-600">
+									{product.rating} ({product.reviewCount} reviews)
+								</span>
+								<div className="flex items-center gap-2">
+									<div className={`w-2.5 h-2.5 rounded-full ${product.stock > 0 ? 'bg-green-500' : 'bg-red-500'}`}></div>
+									<span className={`text-sm font-medium ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
+										{product.stock > 0 ? `${product.stock} in stock` : 'Out of Stock'}
+									</span>
 								</div>
 							</div>
+						</div>
 
-							{/* Pricing & Actions Combined */}
-							<div className="bg-gray-50 p-3 rounded-lg">
-								<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-									<div>
-										<div className="flex items-baseline gap-2">
-											<span className="text-2xl font-bold text-gray-900">
-												{formatPrice(product.price)}
-											</span>
-											{product.old_price && product.old_price > product.price && (
-												<span className="text-sm text-gray-500 line-through">
-													{formatPrice(product.old_price)}
-												</span>
-											)}
-										</div>
-										{discountPercentage > 0 && (
-											<p className="text-xs text-green-600 font-medium">
-												Save {formatPrice(product.old_price! - product.price)} ({discountPercentage}% off)
-											</p>
-										)}
-									</div>
-									<div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
-										<div className="flex items-center border rounded-md w-full sm:w-auto justify-between sm:justify-start">
-											<button
-												onClick={() => setQuantity(Math.max(1, quantity - 1))}
-												className="px-3 py-1 hover:bg-gray-100 text-sm"
-											>
-												-
-											</button>
-											<span className="px-4 py-1 border-x text-sm font-medium min-w-[2.5rem] text-center">{quantity}</span>
-											<button
-												onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-												className="px-3 py-1 hover:bg-gray-100 text-sm"
-											>
-												+
-											</button>
-										</div>
-										<div className="flex flex-wrap gap-2 w-full sm:w-auto">
-											<Button
-												onClick={handleAddToCart}
-												disabled={product.stock === 0}
-												className="bg-orange-600 hover:bg-orange-700 text-white text-sm px-4 flex-1 sm:flex-none"
-											>
-												<ShoppingCart className="h-4 w-4 mr-1" />
-												Add to Cart
-											</Button>
-											<Button
-												variant={isWishlisted ? "default" : "outline"}
-												onClick={handleWishlist}
-												className="px-3"
-												size="sm"
-											>
-												<Heart className={`h-4 w-4 ${isWishlisted ? 'fill-current' : ''}`} />
-											</Button>
-											<Button variant="outline" onClick={handleShare} className="px-3" size="sm">
-												<Share2 className="h-4 w-4" />
-											</Button>
-										</div>
-									</div>
-								</div>
+						{/* Pricing */}
+						<div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
+							<div className="flex items-baseline gap-3 mb-2">
+								<span className="text-3xl md:text-4xl font-bold text-gray-900">
+									{formatPrice(product.price)}
+								</span>
+								{product.old_price && product.old_price > product.price && (
+									<span className="text-xl text-gray-500 line-through">
+										{formatPrice(product.old_price)}
+									</span>
+								)}
 							</div>
-
-							{/* Description & Specs in 2 columns */}
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-							{/* Description */}
-							<div className="bg-white p-3 rounded-lg shadow-sm">
-								<h2 className="text-xs font-semibold text-gray-900 mb-1.5 uppercase">Description</h2>
-								<p className="text-xs text-gray-700 leading-relaxed mb-2 whitespace-pre-line">
-									{product.description || 'No description available for this product.'}
+							{discountPercentage > 0 && (
+								<p className="text-sm text-green-600 font-medium">
+									You save {formatPrice(product.old_price! - product.price)} ({discountPercentage}% off)
 								</p>
-								{product.short_specs && (
-									<div className="mt-2">
-										<h3 className="text-[10px] font-semibold text-gray-900 mb-1 uppercase tracking-wide">Key Specs</h3>
-										<p className="text-xs text-gray-700 whitespace-pre-line">{product.short_specs}</p>
-									</div>
-								)}
-							</div>
+							)}
+						</div>
 
-							{/* Warranty (DB-backed) & core product details */}
-							<div className="bg-white p-3 rounded-lg shadow-sm space-y-2">
-								{product.warranty && (
+						{/* Actions */}
+						<div className="space-y-4">
+							<div className="flex flex-col sm:flex-row gap-3">
+								<div className="flex items-center border-2 border-gray-300 rounded-lg">
+									<button
+										onClick={() => setQuantity(Math.max(1, quantity - 1))}
+										className="px-4 py-3 hover:bg-gray-100 text-lg font-medium"
+									>
+										−
+									</button>
+									<span className="px-6 py-3 border-x-2 border-gray-300 text-lg font-semibold min-w-[4rem] text-center">
+										{quantity}
+									</span>
+									<button
+										onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+										className="px-4 py-3 hover:bg-gray-100 text-lg font-medium"
+									>
+										+
+									</button>
+								</div>
+								<Button
+									onClick={handleAddToCart}
+									disabled={product.stock === 0}
+									className="bg-orange-600 hover:bg-orange-700 text-white text-lg px-8 py-3 h-auto flex-1"
+								>
+									<ShoppingCart className="h-5 w-5 mr-2" />
+									Add to Cart
+								</Button>
+							</div>
+							
+							<div className="flex gap-3">
+								<Button
+									variant={isWishlisted ? "default" : "outline"}
+									onClick={handleWishlist}
+									className="flex-1 py-3 h-auto"
+								>
+									<Heart className={`h-5 w-5 mr-2 ${isWishlisted ? 'fill-current' : ''}`} />
+									{isWishlisted ? 'Wishlisted' : 'Add to Wishlist'}
+								</Button>
+								<Button variant="outline" onClick={handleShare} className="flex-1 py-3 h-auto">
+									<Share2 className="h-5 w-5 mr-2" />
+									Share
+								</Button>
+							</div>
+						</div>
+
+						{/* Service Features */}
+						<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+							<div className="flex items-start gap-3 p-4 bg-blue-50 rounded-lg border border-blue-100">
+								<Truck className="h-6 w-6 text-blue-600 flex-shrink-0 mt-0.5" />
+								<div>
+									<p className="text-sm font-semibold text-blue-900 mb-1">Free Delivery</p>
+									<p className="text-xs text-blue-700">On orders over KSh 10,000</p>
+								</div>
+							</div>
+							<div className="flex items-start gap-3 p-4 bg-green-50 rounded-lg border border-green-100">
+								<Shield className="h-6 w-6 text-green-600 flex-shrink-0 mt-0.5" />
+								<div>
+									<p className="text-sm font-semibold text-green-900 mb-1">Warranty Protected</p>
+									<p className="text-xs text-green-700">Manufacturer warranty included</p>
+								</div>
+							</div>
+						</div>
+
+						{/* Tags and Flags */}
+						{(tags.length > 0 || flags.length > 0) && (
+							<div className="space-y-3 pt-4 border-t border-gray-200">
+								{tags.length > 0 && (
 									<div>
-										<h2 className="text-xs font-semibold text-gray-900 mb-1.5 uppercase">Warranty</h2>
-										<p className="text-xs text-gray-700 leading-relaxed">{product.warranty}</p>
+										<span className="text-xs font-semibold text-gray-600 uppercase mb-2 block">Tags</span>
+										<div className="flex flex-wrap gap-2">
+											{tags.map((tag) => (
+												<span
+													key={tag}
+													className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200"
+												>
+													{tag}
+												</span>
+											))}
+										</div>
 									</div>
 								)}
-								<div className="mt-1">
-									<h2 className="text-xs font-semibold text-gray-900 mb-1.5 uppercase">Product Details</h2>
-									<dl className="grid grid-cols-1 gap-1 text-xs text-gray-700">
-										<div className="flex justify-between">
-											<dt className="font-medium text-gray-600">Brand</dt>
-											<dd className="ml-2 text-gray-800">{product.brand}</dd>
+								{flags.length > 0 && (
+									<div>
+										<span className="text-xs font-semibold text-gray-600 uppercase mb-2 block">Features</span>
+										<div className="flex flex-wrap gap-2">
+											{flags.map((flag) => (
+												<span
+													key={flag}
+													className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200"
+												>
+													{flag}
+												</span>
+											))}
 										</div>
-										{model && (
-											<div className="flex justify-between">
-												<dt className="font-medium text-gray-600">Model</dt>
-												<dd className="ml-2 text-gray-800">{model}</dd>
-											</div>
-										)}
-									</dl>
-								</div>
-								{(tags.length > 0 || flags.length > 0) && (
-									<div className="mt-2 space-y-1">
-										{tags.length > 0 && (
-											<div className="flex flex-wrap gap-1">
-												<span className="text-[10px] font-semibold text-gray-600 uppercase mr-1">Tags:</span>
-												{tags.map((tag) => (
-													<span
-														key={tag}
-														className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] bg-blue-50 text-blue-700 border border-blue-100"
-													>
-														{tag}
-													</span>
-												))}
-											</div>
-										)}
-										{flags.length > 0 && (
-											<div className="flex flex-wrap gap-1">
-												<span className="text-[10px] font-semibold text-gray-600 uppercase mr-1">Flags:</span>
-												{flags.map((flag) => (
-													<span
-														key={flag}
-														className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-100"
-													>
-														{flag}
-													</span>
-												))}
-											</div>
-										)}
 									</div>
 								)}
 							</div>
+						)}
+					</div>
+				</div>
+
+				{/* Description and Details Section */}
+				<div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+					{/* Description - Takes 2 columns on desktop */}
+					<div className="lg:col-span-2 bg-white p-6 md:p-8 rounded-lg shadow-sm">
+						<h2 className="text-xl font-bold text-gray-900 mb-4">Product Description</h2>
+						<div className="prose prose-sm max-w-none">
+							<p className="text-gray-700 leading-relaxed whitespace-pre-line mb-6">
+								{product.description || 'No description available for this product.'}
+							</p>
+							{product.short_specs && (
+								<div className="mt-6 pt-6 border-t border-gray-200">
+									<h3 className="text-lg font-semibold text-gray-900 mb-3">Key Specifications</h3>
+									<p className="text-gray-700 whitespace-pre-line">{product.short_specs}</p>
+								</div>
+							)}
+						</div>
+					</div>
+
+					{/* Product Details Sidebar */}
+					<div className="bg-white p-6 md:p-8 rounded-lg shadow-sm space-y-6">
+						<div>
+							<h2 className="text-xl font-bold text-gray-900 mb-4">Product Details</h2>
+							<dl className="space-y-3">
+								<div className="flex justify-between py-2 border-b border-gray-100">
+									<dt className="font-medium text-gray-600">Brand</dt>
+									<dd className="text-gray-900 font-semibold">{product.brand}</dd>
+								</div>
+								{model && (
+									<div className="flex justify-between py-2 border-b border-gray-100">
+										<dt className="font-medium text-gray-600">Model</dt>
+										<dd className="text-gray-900 font-semibold">{model}</dd>
+									</div>
+								)}
+								<div className="flex justify-between py-2 border-b border-gray-100">
+									<dt className="font-medium text-gray-600">Category</dt>
+									<dd className="text-gray-900 font-semibold">{categoryName}</dd>
+								</div>
+								<div className="flex justify-between py-2">
+									<dt className="font-medium text-gray-600">Availability</dt>
+									<dd className={`font-semibold ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
+										{product.stock > 0 ? 'In Stock' : 'Out of Stock'}
+									</dd>
+								</div>
+							</dl>
 						</div>
 
-						{/* Service Features - Compact */}
-						<div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-							<div className="flex items-center gap-2 p-2 bg-blue-50 rounded-md">
-								<Truck className="h-4 w-4 text-blue-600 flex-shrink-0" />
-								<div>
-									<p className="text-xs font-medium text-blue-900">Free Delivery</p>
-									<p className="text-xs text-blue-700">Orders over KSh 10K</p>
-								</div>
+						{product.warranty && (
+							<div className="pt-6 border-t border-gray-200">
+								<h3 className="text-lg font-semibold text-gray-900 mb-3">Warranty Information</h3>
+								<p className="text-sm text-gray-700 leading-relaxed">{product.warranty}</p>
 							</div>
-							<div className="flex items-center gap-2 p-2 bg-green-50 rounded-md">
-								<Shield className="h-4 w-4 text-green-600 flex-shrink-0" />
-								<div>
-									<p className="text-xs font-medium text-green-900">Warranty</p>
-									<p className="text-xs text-green-700">Manufacturer warranty</p>
-								</div>
-							</div>
-						</div>
+						)}
+					</div>
 				</div>
 
 				{/* Related Products Section */}
 				<div className="mt-12">
-					<h2 className="text-xl font-bold mb-4">You May Also Like</h2>
+					<h2 className="text-2xl font-bold mb-6">You May Also Like</h2>
 					<RelatedProducts currentProduct={product} />
 				</div>
 			</main>
@@ -397,7 +421,6 @@ const ProductDetailPage = () => {
 	);
 };
 
-// Related Products Component - Show more products
 const RelatedProducts = ({ currentProduct }: { currentProduct: any }) => {
 	const [related, setRelated] = React.useState<any[]>([]);
 	React.useEffect(() => {
@@ -408,7 +431,7 @@ const RelatedProducts = ({ currentProduct }: { currentProduct: any }) => {
 					all.filter((p: any) =>
 						p.id !== currentProduct.id &&
 						(p.category === currentProduct.category || p.brand === currentProduct.brand)
-					).slice(0, 12) // Show 12 products
+					).slice(0, 12)
 				);
 			} catch {}
 		};
@@ -418,7 +441,7 @@ const RelatedProducts = ({ currentProduct }: { currentProduct: any }) => {
 	if (!related.length) return null;
 	
 	return (
-		<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+		<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
 			{related.map((product) => (
 				<RelatedProductCard key={product.id} product={product} />
 			))}
@@ -430,20 +453,21 @@ const RelatedProductCard = ({ product }: { product: any }) => {
 	const imageUrl = Array.isArray(product.images) && product.images.length > 0 ? product.images[0] : '/placeholder.png';
 	return (
 		<Link href={`/products/${product.slug}`}>
-			<Card className="group hover:shadow-lg transition-shadow duration-300 h-full">
+			<Card className="group hover:shadow-lg transition-all duration-300 h-full">
 				<CardContent className="p-0">
-					<div className="relative overflow-hidden rounded-t-lg">
+					<div className="relative overflow-hidden rounded-t-lg aspect-square">
 						<Image
 							src={imageUrl}
 							alt={product.name}
-							width={200}
-							height={200}
-							className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300"
+							fill
+							className="object-cover group-hover:scale-105 transition-transform duration-300"
 						/>
 					</div>
 					<div className="p-3">
-						<h3 className="text-sm font-medium text-gray-900 mb-1 line-clamp-2">{product.name}</h3>
-						<span className="text-sm font-bold text-orange-600">
+						<h3 className="text-sm font-medium text-gray-900 mb-2 line-clamp-2 min-h-[2.5rem]">
+							{product.name}
+						</h3>
+						<span className="text-base font-bold text-orange-600">
 							KSh {product.price.toLocaleString()}
 						</span>
 					</div>
