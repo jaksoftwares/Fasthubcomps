@@ -141,10 +141,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, viewMode = 'grid' })
                     {discountPercentage > 0 && (
                       <Badge className="bg-red-100 text-red-800">-{discountPercentage}%</Badge>
                     )}
-                    <div className="flex items-center text-sm text-gray-500">
-                      <Truck className="h-4 w-4 mr-1" />
-                      Free delivery
-                    </div>
                   </div>
                 </div>
                 

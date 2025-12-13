@@ -12,9 +12,10 @@ interface BreadcrumbItem {
 
 interface BreadcrumbProps {
   items?: BreadcrumbItem[];
+  showOnHome?: boolean;
 }
 
-const Breadcrumb: React.FC<BreadcrumbProps> = ({ items }) => {
+const Breadcrumb: React.FC<BreadcrumbProps> = ({ items, showOnHome = false }) => {
   const pathname = usePathname();
 
   // Auto-generate breadcrumbs from pathname if items not provided
@@ -39,13 +40,13 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({ items }) => {
 
   const breadcrumbs = generateBreadcrumbs();
 
-  // Don't show breadcrumb on home page
-  if (pathname === '/') return null;
+  // Don't show breadcrumb on home page unless explicitly enabled
+  if (!showOnHome && pathname === '/') return null;
 
   return (
     <nav className="bg-gray-50 border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-        <ol className="flex items-center space-x-2 text-sm">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-2 sm:py-3">
+        <ol className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm overflow-x-auto whitespace-nowrap">
           {breadcrumbs.map((crumb, index) => {
             const isLast = index === breadcrumbs.length - 1;
             const isFirst = index === 0;

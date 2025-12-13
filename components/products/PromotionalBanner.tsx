@@ -52,8 +52,8 @@ const PromotionalBanner: React.FC<PromotionalBannerProps> = ({ className }) => {
                 <Star className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900">Free Delivery</h3>
-                <p className="text-sm text-gray-600">On orders over KES 10,000</p>
+                <h3 className="font-semibold text-gray-900">Fast Delivery</h3>
+                <p className="text-sm text-gray-600">Reliable nationwide shipping</p>
               </div>
             </div>
           </CardContent>

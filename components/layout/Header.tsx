@@ -44,7 +44,7 @@ const Header = () => {
   // Promo slides for the top bar
   const promoSlides = [
     { text: 'Up to 30% Off on Selected Items', link: '/products' },
-    { text: 'Free Delivery on Orders Over KSh 10,000', link: '/products' },
+    { text: 'Fast Delivery Across Kenya', link: '/products' },
     { text: 'Latest Laptops & Gaming Gear Available', link: '/products?category=laptops' },
     { text: 'Professional Repair Services', link: '/repairs' },
   ];

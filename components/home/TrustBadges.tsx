@@ -17,8 +17,8 @@ const TrustBadges = () => {
     },
     {
       icon: Truck,
-      title: 'Free Delivery',
-      description: 'Orders over KSh 10K',
+      title: 'Fast Delivery',
+      description: 'Reliable nationwide shipping',
     },
     {
       icon: RefreshCw,

@@ -28,7 +28,7 @@ export default async function Home() {
 	return (
 		<div className="min-h-screen bg-gray-50">
 			<Header />
-			<Breadcrumb />
+			<Breadcrumb showOnHome />
 			<main>
 				{/* Best Deals - Limited time offers - PROMINENT */}
 				<BestDeals initialProducts={products} />

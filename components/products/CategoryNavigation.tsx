@@ -91,7 +91,7 @@ const CategoryNavigation: React.FC<CategoryNavigationProps> = ({
                   </div>
                   <div className="flex items-center space-x-2">
                     <Badge variant="secondary">{category.subcategories.length} subcategories</Badge>
-                    <Badge className="bg-blue-100 text-blue-800">Free delivery</Badge>
+                    <Badge className="bg-blue-100 text-blue-800">Fast delivery</Badge>
                   </div>
                 </div>
               );

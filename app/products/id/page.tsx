@@ -302,8 +302,8 @@ const ProductDetailPage = () => {
               <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
                 <Truck className="h-6 w-6 text-blue-600" />
                 <div>
-                  <p className="font-medium text-blue-900">Free Delivery</p>
-                  <p className="text-sm text-blue-700">Orders over KSh 10,000</p>
+                  <p className="font-medium text-blue-900">Fast Delivery</p>
+                  <p className="text-sm text-blue-700">Reliable nationwide shipping</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
