@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,7 @@ const BestDeals = () => {
   const [bestDeals, setBestDeals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchDeals = async () => {
@@ -25,17 +26,22 @@ const BestDeals = () => {
         const data = await ProductsAPI.getAll();
         const deals = Array.isArray(data)
           ? data
-              .filter(p => p.price && p.original_price && p.original_price > p.price)
+              .filter(p => {
+                const tags = Array.isArray(p.tags) ? p.tags : [];
+                return tags.includes('best-deals');
+              })
               .map(p => ({
                 ...p,
-                discount: Math.round(((p.original_price - p.price) / p.original_price) * 100),
+                discount:
+                  p.original_price && p.price
+                    ? Math.round(((p.original_price - p.price) / p.original_price) * 100)
+                    : 0,
                 image: Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : '/placeholder.png',
                 timeLeft: 'Limited',
                 rating: p.rating || 4.5,
                 reviews: p.reviews || 0,
               }))
-              .sort((a, b) => b.discount - a.discount)
-              .slice(0, 18) // Show 18 products for 6x3 grid
+              .slice(0, 18) // Show 18 tagged products
           : [];
         setBestDeals(deals);
       } catch (err: any) {
@@ -46,6 +52,28 @@ const BestDeals = () => {
     };
     fetchDeals();
   }, []);
+
+  // Gentle auto-scroll for the horizontal list, but still
+  // allows the user to manually scroll.
+  useEffect(() => {
+    if (!bestDeals.length) return;
+
+    const container = scrollRef.current;
+    if (!container) return;
+
+    const interval = setInterval(() => {
+      if (!container) return;
+      const maxScrollLeft = container.scrollWidth - container.clientWidth;
+      // If near the end, bounce back to start
+      if (container.scrollLeft >= maxScrollLeft - 10) {
+        container.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        container.scrollBy({ left: 240, behavior: 'smooth' });
+      }
+    }, 5000); // every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [bestDeals.length]);
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat('en-KE', {
@@ -76,13 +104,27 @@ const BestDeals = () => {
           </div>
         </div>
 
-        {/* Compact Product Grid - 6 columns on desktop, 2-3 on mobile */}
+        {/* Compact Product Row - horizontal scroll when many items */}
         {loading ? (
-          <div className="text-center py-8 text-gray-600">Loading deals...</div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+            {Array.from({ length: 6 }).map((_, idx) => (
+              <div key={idx} className="border-0 rounded-xl overflow-hidden bg-white animate-pulse">
+                <div className="h-32 bg-gray-200" />
+                <div className="p-3 space-y-2">
+                  <div className="h-3 bg-gray-200 rounded w-3/4" />
+                  <div className="h-3 bg-gray-200 rounded w-1/2" />
+                  <div className="h-8 bg-gray-200 rounded mt-1" />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : error ? (
           <div className="text-center text-red-500 py-8">{error}</div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+          <div
+            ref={scrollRef}
+            className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide"
+          >
             {bestDeals.map((product, index) => (
               <motion.div
                 key={product.id}
@@ -90,8 +132,9 @@ const BestDeals = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.05 }}
                 viewport={{ once: true }}
+                className="flex-shrink-0 w-48 sm:w-52 md:w-56"
               >
-                <Card className="group border-0 shadow-sm hover:shadow-lg transition-all duration-300 rounded-xl overflow-hidden bg-white">
+                <Card className="group border-0 shadow-sm hover:shadow-lg transition-all duration-300 rounded-xl overflow-hidden bg-white h-full">
                   <CardContent className="p-2">
                     {/* Compact Product Image */}
                     <Link href={`/products/${product.slug}`} className="block">

@@ -85,10 +85,35 @@ const FeaturedProducts = () => {
   };
 
   if (loading) {
+    // Show compact skeleton cards instead of a visible "Loading" message
+    const skeletons = Array.from({ length: 8 });
     return (
-      <section className="py-8 bg-gradient-to-b from-white to-gray-50 text-center">
-        <div className="inline-block h-6 w-6 animate-spin rounded-full border-3 border-solid border-orange-600 border-r-transparent"></div>
-        <p className="mt-2 text-gray-600 text-sm">Loading...</p>
+      <section className="py-8 bg-gradient-to-b from-white to-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-8">
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-4 rounded-lg shadow-lg">
+              <h2 className="text-3xl font-bold text-white">Featured Products</h2>
+            </div>
+          </div>
+
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+            {skeletons.map((_, idx) => (
+              <div
+                key={idx}
+                className="min-w-[180px] sm:min-w-[200px] md:min-w-[220px] snap-start flex-shrink-0"
+              >
+                <div className="border rounded-xl bg-white shadow-sm animate-pulse">
+                  <div className="h-32 bg-gray-200 rounded-t-xl" />
+                  <div className="p-3 space-y-2">
+                    <div className="h-3 bg-gray-200 rounded w-3/4" />
+                    <div className="h-3 bg-gray-200 rounded w-1/2" />
+                    <div className="h-8 bg-gray-200 rounded mt-2" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
     );
   }

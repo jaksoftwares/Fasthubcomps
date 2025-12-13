@@ -18,7 +18,15 @@ interface EditProductModalProps {
 }
 
 const flagOptions = ['new', 'premium', 'executive'];
-const tagOptions = ['top-deals', 'new-arrivals', 'best-sellers', 'clearance'];
+const tagOptions = [
+  'best-deals',
+  'top-deals',
+  'top-sales',
+  'featured-home',
+  'new-arrivals',
+  'best-sellers',
+  'clearance',
+];
 
 const EditProductModal: React.FC<EditProductModalProps> = ({ isOpen, product, onClose, onProductUpdated }) => {
   const [formData, setFormData] = useState<any | null>(null);

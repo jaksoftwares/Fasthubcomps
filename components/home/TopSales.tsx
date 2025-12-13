@@ -66,9 +66,29 @@ const TopSales = () => {
   };
 
   if (loading) {
+    const skeletons = Array.from({ length: 6 });
     return (
       <section className="py-8 bg-gradient-to-b from-gray-50 to-gray-100">
-        <div className="text-center text-gray-600 text-sm">Loading top sales...</div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-8">
+            <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-4 rounded-lg shadow-lg">
+              <h2 className="text-3xl font-bold text-white">Top Sales</h2>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+            {skeletons.map((_, idx) => (
+              <div key={idx} className="border-0 rounded-xl bg-white shadow-sm animate-pulse">
+                <div className="h-32 bg-gray-200 rounded-t-xl" />
+                <div className="p-3 space-y-2">
+                  <div className="h-3 bg-gray-200 rounded w-3/4" />
+                  <div className="h-3 bg-gray-200 rounded w-1/2" />
+                  <div className="h-8 bg-gray-200 rounded mt-1" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
     );
   }
@@ -94,9 +114,7 @@ const TopSales = () => {
         </div>
 
         {/* Compact Product Grid - 6 columns on desktop, 2-3 on mobile */}
-        {loading ? (
-          <div className="text-center py-4 text-gray-600 text-sm">Loading...</div>
-        ) : error ? (
+        {error ? (
           <div className="text-center text-red-500 py-4 text-sm">{error}</div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">

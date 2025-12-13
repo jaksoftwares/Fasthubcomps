@@ -173,26 +173,27 @@ const Header = () => {
   const categoryMenu = [
     {
       name: 'Computers',
-      href: '/products?category=computers',
+      // Map to "desktops" category which is backed by the real Supabase category_id
+      href: '/products?category=desktops',
       icon: '💻',
       subcategories: [
         {
           title: 'By Type',
           items: [
-            { name: 'Desktop Computers', href: '/products?category=computers&type=desktop' },
-            { name: 'All-in-One PCs', href: '/products?category=computers&type=all-in-one' },
-            { name: 'Gaming PCs', href: '/products?category=computers&type=gaming' },
-            { name: 'Workstations', href: '/products?category=computers&type=workstation' },
+            { name: 'Desktop Computers', href: '/products?category=desktops&type=desktop' },
+            { name: 'All-in-One PCs', href: '/products?category=desktops&type=all-in-one' },
+            { name: 'Gaming PCs', href: '/products?category=desktops&type=gaming' },
+            { name: 'Workstations', href: '/products?category=desktops&type=workstation' },
           ]
         },
         {
           title: 'By Brand',
           items: [
-            { name: 'Dell Computers', href: '/products?category=computers&brand=dell' },
-            { name: 'HP Computers', href: '/products?category=computers&brand=hp' },
-            { name: 'Lenovo Computers', href: '/products?category=computers&brand=lenovo' },
-            { name: 'Apple iMac', href: '/products?category=computers&brand=apple' },
-            { name: 'ASUS Computers', href: '/products?category=computers&brand=asus' },
+            { name: 'Dell Computers', href: '/products?category=desktops&brand=dell' },
+            { name: 'HP Computers', href: '/products?category=desktops&brand=hp' },
+            { name: 'Lenovo Computers', href: '/products?category=desktops&brand=lenovo' },
+            { name: 'Apple iMac', href: '/products?category=desktops&brand=apple' },
+            { name: 'ASUS Computers', href: '/products?category=desktops&brand=asus' },
           ]
         }
       ]
@@ -226,26 +227,27 @@ const Header = () => {
     },
     {
       name: 'Phones & Tablets',
-      href: '/products?category=phones',
+      // Use the real slug used by the products page/category mapping
+      href: '/products?category=phones-tablets',
       icon: '📱',
       subcategories: [
         {
           title: 'By Type',
           items: [
-            { name: 'Smartphones', href: '/products?category=phones&type=smartphone' },
-            { name: 'Feature Phones', href: '/products?category=phones&type=feature' },
-            { name: 'Tablets', href: '/products?category=phones&type=tablet' },
+            { name: 'Smartphones', href: '/products?category=phones-tablets&type=smartphone' },
+            { name: 'Feature Phones', href: '/products?category=phones-tablets&type=feature' },
+            { name: 'Tablets', href: '/products?category=phones-tablets&type=tablet' },
           ]
         },
         {
           title: 'By Brand',
           items: [
-            { name: 'Samsung', href: '/products?category=phones&brand=samsung' },
-            { name: 'Apple iPhone', href: '/products?category=phones&brand=apple' },
-            { name: 'Xiaomi', href: '/products?category=phones&brand=xiaomi' },
-            { name: 'Oppo', href: '/products?category=phones&brand=oppo' },
-            { name: 'Tecno', href: '/products?category=phones&brand=tecno' },
-            { name: 'Infinix', href: '/products?category=phones&brand=infinix' },
+            { name: 'Samsung', href: '/products?category=phones-tablets&brand=samsung' },
+            { name: 'Apple iPhone', href: '/products?category=phones-tablets&brand=apple' },
+            { name: 'Xiaomi', href: '/products?category=phones-tablets&brand=xiaomi' },
+            { name: 'Oppo', href: '/products?category=phones-tablets&brand=oppo' },
+            { name: 'Tecno', href: '/products?category=phones-tablets&brand=tecno' },
+            { name: 'Infinix', href: '/products?category=phones-tablets&brand=infinix' },
           ]
         }
       ]
@@ -340,17 +342,18 @@ const Header = () => {
     },
     {
       name: 'Software',
-      href: '/products?category=software',
+      // No dedicated "software" category in the main mapping; use search-based links
+      href: '/products?search=software',
       icon: '💿',
       subcategories: [
         {
           title: 'Software Categories',
           items: [
-            { name: 'Operating Systems', href: '/products?category=software&type=os' },
-            { name: 'Microsoft Office', href: '/products?category=software&type=office' },
-            { name: 'Antivirus & Security', href: '/products?category=software&type=antivirus' },
-            { name: 'Design Software', href: '/products?category=software&type=design' },
-            { name: 'Business Software', href: '/products?category=software&type=business' },
+            { name: 'Operating Systems', href: '/products?search=operating%20system' },
+            { name: 'Microsoft Office', href: '/products?search=microsoft%20office' },
+            { name: 'Antivirus & Security', href: '/products?search=antivirus' },
+            { name: 'Design Software', href: '/products?search=design%20software' },
+            { name: 'Business Software', href: '/products?search=business%20software' },
           ]
         }
       ]

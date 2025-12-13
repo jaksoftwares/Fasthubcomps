@@ -39,7 +39,10 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onPr
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [submitStep, setSubmitStep] = useState<'idle' | 'uploading-images' | 'saving-product'>('idle');
   const [availableTags] = useState([
+    'best-deals',
     'top-deals',
+    'top-sales',
+    'featured-home',
     'new-arrivals',
     'best-sellers',
     'clearance',

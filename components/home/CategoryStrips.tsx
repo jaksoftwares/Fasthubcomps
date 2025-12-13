@@ -94,10 +94,29 @@ const CategoryStrips = () => {
   ];
 
   if (loading) {
+    const skeletonSections = Array.from({ length: 3 });
     return (
-      <section className="py-8 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-sm text-gray-600">
-          Loading categories...
+      <section className="py-8 bg-white border-t border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+          {skeletonSections.map((_, idx) => (
+            <div key={idx} className="space-y-3 animate-pulse">
+              <div className="h-4 bg-gray-200 rounded w-40" />
+              <div className="flex gap-3 overflow-x-auto pb-2">
+                {Array.from({ length: 4 }).map((__, cardIdx) => (
+                  <div
+                    key={cardIdx}
+                    className="flex-shrink-0 w-40 sm:w-44 border-0 shadow-sm bg-white rounded-xl"
+                  >
+                    <div className="h-28 sm:h-32 bg-gray-200 rounded-t-xl" />
+                    <div className="p-3 space-y-2">
+                      <div className="h-3 bg-gray-200 rounded w-3/4" />
+                      <div className="h-3 bg-gray-200 rounded w-1/2" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </section>
     );
