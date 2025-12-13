@@ -1,15 +1,19 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { getSupabaseServerClient } from "@/lib/supabase/server"; // ✅ correct import
 import bcrypt from "bcryptjs";
 
 // ✅ GET /api/customers/[customer_id]
-export async function GET(_: Request, { params }: { params: { customer_id: string } }) {
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ customer_id: string }> }
+) {
+  const { customer_id } = await params;
   const supabase = getSupabaseServerClient();
 
   const { data, error } = await supabase
     .from("customers")
     .select("*")
-    .eq("id", params.customer_id)
+    .eq("id", customer_id)
     .single();
 
   if (error) {
@@ -20,7 +24,11 @@ export async function GET(_: Request, { params }: { params: { customer_id: strin
 }
 
 // ✅ PUT /api/customers/[customer_id]
-export async function PUT(req: Request, { params }: { params: { customer_id: string } }) {
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ customer_id: string }> }
+) {
+  const { customer_id } = await params;
   const supabase = getSupabaseServerClient();
   const body = await req.json();
   const updateData: Record<string, any> = { ...body };
@@ -33,7 +41,7 @@ export async function PUT(req: Request, { params }: { params: { customer_id: str
   const { data, error } = await supabase
     .from("customers")
     .update(updateData)
-    .eq("id", params.customer_id)
+    .eq("id", customer_id)
     .select()
     .single();
 
@@ -45,13 +53,17 @@ export async function PUT(req: Request, { params }: { params: { customer_id: str
 }
 
 // ✅ DELETE /api/customers/[customer_id]
-export async function DELETE(_: Request, { params }: { params: { customer_id: string } }) {
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ customer_id: string }> }
+) {
+  const { customer_id } = await params;
   const supabase = getSupabaseServerClient();
 
   const { error } = await supabase
     .from("customers")
     .delete()
-    .eq("id", params.customer_id);
+    .eq("id", customer_id);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
