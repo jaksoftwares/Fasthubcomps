@@ -49,7 +49,11 @@ interface Product {
   category?: string;
 }
 
-const ProductsPageClient = () => {
+interface ProductsPageClientProps {
+  initialProducts: Product[];
+}
+
+const ProductsPageClient: React.FC<ProductsPageClientProps> = ({ initialProducts }) => {
   const searchParams = useSearchParams();
   const rawCategoryParam = searchParams.get('category');
 
@@ -74,9 +78,8 @@ const ProductsPageClient = () => {
     tags: [] as string[],
   });
 
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [allProducts, setAllProducts] = useState<Product[]>(initialProducts || []);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const categories = [
@@ -99,38 +102,12 @@ const ProductsPageClient = () => {
   ];
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await ProductsAPI.getAll();
-        const mapped: Product[] = Array.isArray(data)
-          ? data.map((p): Product => ({
-              id: p.id || '',
-              slug: p.slug || p.id || '',
-              name: p.name || '',
-              price: Number(p.price) || 0,
-              original_price: Number(p.old_price) || Number(p.price) || 0,
-              images: Array.isArray(p.images) ? p.images : ['/placeholder.png'],
-              category: p.category_id || '',
-              brand: p.brand || 'Generic',
-              rating: Number(p.rating) || 4.5,
-              reviews: Number(p.reviews) || Math.floor(Math.random() * 500) + 10,
-              is_featured: Boolean(p.is_featured) || false,
-              is_bestseller: Boolean(p.is_bestseller) || false,
-              is_new: Boolean(p.is_new) || false,
-              discount: Number(p.discount) || 0,
-            }))
-          : [];
-        setAllProducts(mapped);
-      } catch (err: any) {
-        setError(err?.message || 'Failed to fetch products');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProducts();
-  }, []);
+    if (!Array.isArray(initialProducts) || initialProducts.length === 0) {
+      setAllProducts([]);
+      return;
+    }
+    setAllProducts(initialProducts);
+  }, [initialProducts]);
 
   useEffect(() => {
     let filtered = allProducts;
@@ -302,7 +279,7 @@ const ProductsPageClient = () => {
       </div>
 
       {/* Sales-Focused Quick Sections */}
-      {!loading && !filters.search && (filters.category === 'all' || !filters.category) ? (
+      {!filters.search && (filters.category === 'all' || !filters.category) ? (
         <div className="bg-white border-b">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             {/* On Sale Section */}
@@ -476,28 +453,9 @@ const ProductsPageClient = () => {
             </div>
 
             {/* Products */}
-            {loading ? (
-              <div className={cn(
-                "grid gap-6",
-                "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
-              )}>
-                {Array.from({ length: 8 }).map((_, idx) => (
-                  <div
-                    key={idx}
-                    className="border rounded-lg bg-white shadow-sm animate-pulse"
-                  >
-                    <div className="h-40 bg-gray-200 rounded-t-lg" />
-                    <div className="p-3 space-y-2">
-                      <div className="h-3 bg-gray-200 rounded w-3/4" />
-                      <div className="h-3 bg-gray-200 rounded w-1/2" />
-                      <div className="h-4 bg-gray-200 rounded w-1/3 mt-1" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : error ? (
-              <div className="text-center py-12">
-                <p className="text-red-500">{error}</p>
+            {error ? (
+              <div className="text-center py-16">
+                <p className="text-red-500 mb-2">{error}</p>
                 <Button onClick={() => window.location.reload()} className="mt-4">
                   Retry
                 </Button>
