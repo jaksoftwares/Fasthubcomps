@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -8,7 +8,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Star, ShoppingCart, TrendingUp } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
-import { ProductsAPI } from '@/lib/services/products';
 
 interface TopSalesProps {
   initialProducts?: any[];
@@ -33,28 +32,7 @@ const TopSales: React.FC<TopSalesProps> = ({ initialProducts = [] }) => {
           .slice(0, 18)
       : [];
 
-  const [topSalesProducts, setTopSalesProducts] = useState<any[]>(() => deriveTopSales(initialProducts));
-  const [loading, setLoading] = useState(topSalesProducts.length === 0);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (topSalesProducts.length > 0) return;
-
-    const fetchTopSales = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await ProductsAPI.getAll();
-        const topSales = deriveTopSales(data);
-        setTopSalesProducts(topSales);
-      } catch (err: any) {
-        setError(err?.message || 'Failed to fetch top sales');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchTopSales();
-  }, [topSalesProducts.length]);
+  const topSalesProducts = deriveTopSales(initialProducts);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-KE', {
@@ -74,42 +52,6 @@ const TopSales: React.FC<TopSalesProps> = ({ initialProducts = [] }) => {
     });
   };
 
-  if (loading) {
-    const skeletons = Array.from({ length: 6 });
-    return (
-      <section className="py-8 bg-gradient-to-b from-gray-50 to-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-8">
-            <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-4 rounded-lg shadow-lg">
-              <h2 className="text-3xl font-bold text-white">Top Sales</h2>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-            {skeletons.map((_, idx) => (
-              <div key={idx} className="border-0 rounded-xl bg-white shadow-sm animate-pulse">
-                <div className="h-32 bg-gray-200 rounded-t-xl" />
-                <div className="p-3 space-y-2">
-                  <div className="h-3 bg-gray-200 rounded w-3/4" />
-                  <div className="h-3 bg-gray-200 rounded w-1/2" />
-                  <div className="h-8 bg-gray-200 rounded mt-1" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (error) {
-    return (
-      <section className="py-8 bg-gradient-to-b from-gray-50 to-gray-100">
-        <div className="text-center text-red-500 text-sm">{error}</div>
-      </section>
-    );
-  }
-
   return (
     <section className="py-8 bg-gradient-to-b from-gray-50 to-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -123,11 +65,8 @@ const TopSales: React.FC<TopSalesProps> = ({ initialProducts = [] }) => {
         </div>
 
         {/* Compact Product Grid - 6 columns on desktop, 2-3 on mobile */}
-        {error ? (
-          <div className="text-center text-red-500 py-4 text-sm">{error}</div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-            {topSalesProducts.map((product, index) => (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+          {topSalesProducts.map((product, index) => (
               <Card
                 key={product.id}
                 className="group border-0 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden rounded-xl bg-white"
@@ -140,6 +79,8 @@ const TopSales: React.FC<TopSalesProps> = ({ initialProducts = [] }) => {
                         src={product.image}
                         alt={product.name}
                         fill
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 16vw"
+                        loading={index < 6 ? 'eager' : 'lazy'}
                         className="object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                       <Badge className="absolute top-1 left-1 bg-green-600 text-white text-xs px-1.5 py-0.5 rounded flex items-center">
@@ -202,7 +143,6 @@ const TopSales: React.FC<TopSalesProps> = ({ initialProducts = [] }) => {
               </Card>
             ))}
           </div>
-        )}
 
         {/* Compact View All */}
         <div className="text-center mt-6">

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -8,7 +8,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Star, ShoppingCart, Heart, Eye, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
-import { ProductsAPI } from '@/lib/services/products';
 
 interface FeaturedProductsProps {
   initialProducts?: any[];
@@ -30,30 +29,9 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ initialProducts = [
           .slice(0, 18)
       : [];
 
-  const [featuredProducts, setFeaturedProducts] = useState<any[]>(() => deriveFeatured(initialProducts));
-  const [loading, setLoading] = useState(featuredProducts.length === 0);
-  const [error, setError] = useState<string | null>(null);
+  const featuredProducts = deriveFeatured(initialProducts);
   const [wishlist, setWishlist] = useState<Set<string>>(new Set());
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (featuredProducts.length > 0) return;
-
-    const fetchFeatured = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await ProductsAPI.getAll();
-        const featured = deriveFeatured(data);
-        setFeaturedProducts(featured);
-      } catch (err: any) {
-        setError(err?.message || 'Failed to fetch featured products');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchFeatured();
-  }, [featuredProducts.length]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-KE', {
@@ -93,48 +71,6 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ initialProducts = [
     scrollRef.current?.scrollBy({ left: 320, behavior: 'smooth' });
   };
 
-  if (loading) {
-    // Show compact skeleton cards instead of a visible "Loading" message
-    const skeletons = Array.from({ length: 8 });
-    return (
-      <section className="py-8 bg-gradient-to-b from-white to-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-8">
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-4 rounded-lg shadow-lg">
-              <h2 className="text-3xl font-bold text-white">Featured Products</h2>
-            </div>
-          </div>
-
-          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-            {skeletons.map((_, idx) => (
-              <div
-                key={idx}
-                className="min-w-[180px] sm:min-w-[200px] md:min-w-[220px] snap-start flex-shrink-0"
-              >
-                <div className="border rounded-xl bg-white shadow-sm animate-pulse">
-                  <div className="h-32 bg-gray-200 rounded-t-xl" />
-                  <div className="p-3 space-y-2">
-                    <div className="h-3 bg-gray-200 rounded w-3/4" />
-                    <div className="h-3 bg-gray-200 rounded w-1/2" />
-                    <div className="h-8 bg-gray-200 rounded mt-2" />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (error) {
-    return (
-      <section className="py-8 text-center text-red-500 bg-gradient-to-b from-white to-gray-50">
-        {error}
-      </section>
-    );
-  }
-
   return (
     <section className="py-8 bg-gradient-to-b from-white to-gray-50 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -152,7 +88,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ initialProducts = [
           ref={scrollRef}
           className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide scroll-smooth pb-2"
         >
-          {featuredProducts.map((product) => (
+          {featuredProducts.map((product, index) => (
             <div
               key={product.id}
               className="min-w-[180px] sm:min-w-[200px] md:min-w-[220px] snap-start flex-shrink-0"
@@ -167,6 +103,8 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ initialProducts = [
                           src={product.image}
                           alt={product.name}
                           fill
+                          sizes="(max-width: 640px) 70vw, (max-width: 1024px) 30vw, 18vw"
+                          loading={index < 4 ? 'eager' : 'lazy'}
                           className="object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       </div>
