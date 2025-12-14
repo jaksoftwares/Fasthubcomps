@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import ProductsPageClient from './ProductsPageClient';
 import { unstable_cache } from 'next/cache';
 import { getSupabaseServerClient } from '@/lib/supabaseClient';
@@ -44,5 +45,9 @@ export default async function ProductsPage() {
 			}))
 		: [];
 
-	return <ProductsPageClient initialProducts={initialProducts} />;
+	return (
+		<Suspense fallback={null}>
+			<ProductsPageClient initialProducts={initialProducts} />
+		</Suspense>
+	);
 }

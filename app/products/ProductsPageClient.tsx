@@ -541,7 +541,7 @@ const ProductsPageClient: React.FC<ProductsPageClientProps> = ({ initialProducts
         </div>
 
         {/* Horizontal Product Sections - After Main Grid */}
-        {!loading && !filters.search && (filters.category === 'all' || !filters.category) ? (
+        {!filters.search && (filters.category === 'all' || !filters.category) ? (
           <div className="mt-8 space-y-8">
             {/* Black Friday - Refurbished Laptops Section */}
             <div className="bg-gray-50 py-8">
