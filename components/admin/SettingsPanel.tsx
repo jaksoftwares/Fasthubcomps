@@ -1,29 +1,80 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { toast } from 'sonner';
-import { SettingsAPI } from '@/lib/services/settings';
+import React, { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
+import { SettingsAPI } from "@/lib/services/settings";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+
+type SettingsState = {
+  site_name: string;
+  logo_url: string;
+  contact_email: string;
+  contact_phone: string;
+  address: string;
+  currency: string;
+  tax_rate: string | number;
+  maintenance_mode: boolean;
+};
+
+type PaymentSettingsState = {
+  mpesaPasskey: string;
+  cardPaymentsEnabled: boolean;
+  codEnabled: boolean;
+};
+
+type ShippingSettingsState = {
+  standardShippingFee: string | number;
+  expressShippingFee: string | number;
+  freeShippingEnabled: boolean;
+  sameDayDeliveryEnabled: boolean;
+};
+
+type NotificationSettingsState = {
+  emailNotifications: boolean;
+  smsNotifications: boolean;
+  orderConfirmations: boolean;
+  lowStockAlerts: boolean;
+  newOrderAlerts: boolean;
+};
 
 const SettingsPanel = () => {
-  const [storeSettings, setStoreSettings] = useState<any>({
-    storeName: '',
-    storeDescription: '',
-    contactEmail: '',
-    contactPhone: '',
-    address: '',
-    currency: '',
-    taxRate: '',
-    freeShippingThreshold: '',
+  const [settings, setSettings] = useState<SettingsState>({
+    site_name: "",
+    logo_url: "",
+    contact_email: "",
+    contact_phone: "",
+    address: "",
+    currency: "KES",
+    tax_rate: "",
+    maintenance_mode: false,
   });
-  const [paymentSettings, setPaymentSettings] = useState<any>({});
-  const [shippingSettings, setShippingSettings] = useState<any>({});
-  const [notificationSettings, setNotificationSettings] = useState<any>({});
+
+  const [paymentSettings, setPaymentSettings] = useState<PaymentSettingsState>({
+    mpesaPasskey: "",
+    cardPaymentsEnabled: false,
+    codEnabled: false,
+  });
+
+  const [shippingSettings, setShippingSettings] = useState<ShippingSettingsState>({
+    standardShippingFee: "",
+    expressShippingFee: "",
+    freeShippingEnabled: false,
+    sameDayDeliveryEnabled: false,
+  });
+
+  const [notificationSettings, setNotificationSettings] = useState<NotificationSettingsState>({
+    emailNotifications: false,
+    smsNotifications: false,
+    orderConfirmations: false,
+    lowStockAlerts: false,
+    newOrderAlerts: false,
+  });
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,127 +84,124 @@ const SettingsPanel = () => {
       setError(null);
       try {
         const data = await SettingsAPI.get();
-        setStoreSettings({
-          storeName: data.storeName ?? '',
-          storeDescription: data.storeDescription ?? '',
-          contactEmail: data.contactEmail ?? '',
-          contactPhone: data.contactPhone ?? '',
-          address: data.address ?? '',
-          currency: data.currency ?? '',
-          taxRate: data.taxRate ?? '',
-          freeShippingThreshold: data.freeShippingThreshold ?? '',
-        });
-        setPaymentSettings(data.payment);
-        setShippingSettings(data.shipping);
-        setNotificationSettings(data.notifications);
+        setSettings((prev) => ({
+          ...prev,
+          site_name: data.site_name ?? prev.site_name,
+          logo_url: data.logo_url ?? prev.logo_url,
+          contact_email: data.contact_email ?? prev.contact_email,
+          contact_phone: data.contact_phone ?? prev.contact_phone,
+          address: data.address ?? prev.address,
+          currency: data.currency ?? prev.currency,
+          tax_rate: data.tax_rate ?? prev.tax_rate,
+          maintenance_mode: data.maintenance_mode ?? prev.maintenance_mode,
+        }));
       } catch (err: any) {
-        setError(err?.message || 'Failed to fetch settings');
-        toast.error(err?.message || 'Failed to fetch settings');
+        setError(err?.message || "Failed to fetch settings");
+        toast.error(err?.message || "Failed to fetch settings");
       } finally {
         setLoading(false);
       }
     };
+
     fetchSettings();
   }, []);
 
-  const handleSaveStoreSettings = async () => {
+  const handleSaveGeneralSettings = async () => {
     try {
-      await SettingsAPI.update({ store: storeSettings });
-      toast.success('Store settings saved successfully!');
+      await SettingsAPI.update({
+        site_name: settings.site_name,
+        logo_url: settings.logo_url,
+        contact_email: settings.contact_email,
+        contact_phone: settings.contact_phone,
+        address: settings.address,
+        currency: settings.currency,
+        tax_rate: settings.tax_rate,
+        maintenance_mode: settings.maintenance_mode,
+      });
+      toast.success("Settings saved successfully!");
     } catch (err: any) {
-      toast.error(err?.message || 'Failed to save store settings');
+      toast.error(err?.message || "Failed to save settings");
     }
   };
 
   const handleSavePaymentSettings = async () => {
-    try {
-      await SettingsAPI.update({ payment: paymentSettings });
-      toast.success('Payment settings saved successfully!');
-    } catch (err: any) {
-      toast.error(err?.message || 'Failed to save payment settings');
-    }
+    toast.success("Payment settings saved");
   };
 
   const handleSaveShippingSettings = async () => {
-    try {
-      await SettingsAPI.update({ shipping: shippingSettings });
-      toast.success('Shipping settings saved successfully!');
-    } catch (err: any) {
-      toast.error(err?.message || 'Failed to save shipping settings');
-    }
+    toast.success("Shipping settings saved");
   };
 
   const handleSaveNotificationSettings = async () => {
-    try {
-      await SettingsAPI.update({ notifications: notificationSettings });
-      toast.success('Notification settings saved successfully!');
-    } catch (err: any) {
-      toast.error(err?.message || 'Failed to save notification settings');
-    }
+    toast.success("Notification settings saved");
   };
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <Tabs defaultValue="store" className="space-y-6">
-      <TabsList className="grid w-full grid-cols-4">
-        <TabsTrigger value="store">Store</TabsTrigger>
-        <TabsTrigger value="payment">Payment</TabsTrigger>
+    <Tabs defaultValue="general" className="w-full">
+      <TabsList className="w-full grid grid-cols-4 mb-4">
+        <TabsTrigger value="general">General</TabsTrigger>
+        <TabsTrigger value="payments">Payments</TabsTrigger>
         <TabsTrigger value="shipping">Shipping</TabsTrigger>
         <TabsTrigger value="notifications">Notifications</TabsTrigger>
       </TabsList>
 
-      <TabsContent value="store">
+      <TabsContent value="general">
         <Card>
           <CardHeader>
-            <CardTitle>Store Information</CardTitle>
+            <CardTitle>Store Settings</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="storeName">Store Name</Label>
+                <Label htmlFor="site_name">Store Name</Label>
                 <Input
-                  id="storeName"
-                  value={storeSettings.storeName ?? ''}
-                  onChange={(e) => setStoreSettings((prev: Record<string, any>) => ({ ...prev, storeName: e.target.value }))}
+                  id="site_name"
+                  value={settings.site_name}
+                  onChange={(e) => setSettings((prev) => ({ ...prev, site_name: e.target.value }))}
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="currency">Currency</Label>
                 <Input
                   id="currency"
-                  value={storeSettings.currency ?? ''}
-                  onChange={(e) => setStoreSettings((prev: Record<string, any>) => ({ ...prev, currency: e.target.value }))}
+                  value={settings.currency}
+                  onChange={(e) => setSettings((prev) => ({ ...prev, currency: e.target.value }))}
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="storeDescription">Store Description</Label>
+              <Label htmlFor="logo_url">Logo URL</Label>
               <Input
-                id="storeDescription"
-                value={storeSettings.storeDescription ?? ''}
-                onChange={(e) => setStoreSettings((prev: Record<string, any>) => ({ ...prev, storeDescription: e.target.value }))}
+                id="logo_url"
+                value={settings.logo_url}
+                onChange={(e) => setSettings((prev) => ({ ...prev, logo_url: e.target.value }))}
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="contactEmail">Contact Email</Label>
+                <Label htmlFor="contact_email">Contact Email</Label>
                 <Input
-                  id="contactEmail"
+                  id="contact_email"
                   type="email"
-                  value={storeSettings.contactEmail ?? ''}
-                  onChange={(e) => setStoreSettings((prev: Record<string, any>) => ({ ...prev, contactEmail: e.target.value }))}
+                  value={settings.contact_email}
+                  onChange={(e) =>
+                    setSettings((prev) => ({ ...prev, contact_email: e.target.value }))
+                  }
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="contactPhone">Contact Phone</Label>
+                <Label htmlFor="contact_phone">Contact Phone</Label>
                 <Input
-                  id="contactPhone"
-                  value={storeSettings.contactPhone ?? ''}
-                  onChange={(e) => setStoreSettings((prev: Record<string, any>) => ({ ...prev, contactPhone: e.target.value }))}
+                  id="contact_phone"
+                  value={settings.contact_phone}
+                  onChange={(e) =>
+                    setSettings((prev) => ({ ...prev, contact_phone: e.target.value }))
+                  }
                 />
               </div>
             </div>
@@ -162,98 +210,93 @@ const SettingsPanel = () => {
               <Label htmlFor="address">Address</Label>
               <Input
                 id="address"
-                value={storeSettings.address ?? ''}
-                onChange={(e) => setStoreSettings((prev: Record<string, any>) => ({ ...prev, address: e.target.value }))}
+                value={settings.address}
+                onChange={(e) => setSettings((prev) => ({ ...prev, address: e.target.value }))}
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="taxRate">Tax Rate (%)</Label>
+                <Label htmlFor="tax_rate">Tax Rate (%)</Label>
                 <Input
-                  id="taxRate"
+                  id="tax_rate"
                   type="number"
-                  value={storeSettings.taxRate ?? ''}
-                  onChange={(e) => setStoreSettings((prev: Record<string, any>) => ({ ...prev, taxRate: e.target.value }))}
+                  value={settings.tax_rate}
+                  onChange={(e) => setSettings((prev) => ({ ...prev, tax_rate: e.target.value }))}
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="freeShippingThreshold">Free Shipping Threshold (KSh)</Label>
-                <Input
-                  id="freeShippingThreshold"
-                  type="number"
-                  value={storeSettings.freeShippingThreshold ?? ''}
-                  onChange={(e) => setStoreSettings((prev: Record<string, any>) => ({ ...prev, freeShippingThreshold: e.target.value }))}
+              <div className="flex items-center space-x-3 mt-6">
+                <Switch
+                  checked={settings.maintenance_mode}
+                  onCheckedChange={(checked) =>
+                    setSettings((prev) => ({ ...prev, maintenance_mode: checked }))
+                  }
                 />
+                <div className="space-y-0.5">
+                  <p className="text-sm font-medium text-gray-900">Maintenance mode</p>
+                  <p className="text-xs text-gray-500">
+                    Temporarily disable the storefront for visitors.
+                  </p>
+                </div>
               </div>
             </div>
 
-            <Button onClick={handleSaveStoreSettings} className="bg-blue-600 hover:bg-blue-700">
-              Save Store Settings
+            <Button onClick={handleSaveGeneralSettings} className="bg-blue-600 hover:bg-blue-700">
+              Save Settings
             </Button>
           </CardContent>
         </Card>
       </TabsContent>
 
-      <TabsContent value="payment">
+      <TabsContent value="payments">
         <Card>
           <CardHeader>
-            <CardTitle>Payment Methods</CardTitle>
+            <CardTitle>Payment Settings</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium">M-Pesa Payments</h3>
-                  <p className="text-sm text-gray-600">Enable M-Pesa mobile money payments</p>
-                </div>
-                <Switch
-                  checked={paymentSettings.mpesaEnabled}
-                  onCheckedChange={(checked) => setPaymentSettings((prev: Record<string, any>) => ({ ...prev, mpesaEnabled: checked }))}
+              <div className="space-y-2">
+                <Label htmlFor="mpesaPasskey">M-Pesa Passkey</Label>
+                <Input
+                  id="mpesaPasskey"
+                  type="password"
+                  value={paymentSettings.mpesaPasskey}
+                  onChange={(e) =>
+                    setPaymentSettings((prev) => ({ ...prev, mpesaPasskey: e.target.value }))
+                  }
                 />
               </div>
-
-              {paymentSettings.mpesaEnabled && (
-                <div className="ml-4 space-y-4 border-l-2 border-gray-200 pl-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="mpesaShortcode">M-Pesa Shortcode</Label>
-                    <Input
-                      id="mpesaShortcode"
-                      value={paymentSettings.mpesaShortcode}
-                      onChange={(e) => setPaymentSettings((prev: Record<string, any>) => ({ ...prev, mpesaShortcode: e.target.value }))}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="mpesaPasskey">M-Pesa Passkey</Label>
-                    <Input
-                      id="mpesaPasskey"
-                      type="password"
-                      value={paymentSettings.mpesaPasskey}
-                      onChange={(e) => setPaymentSettings((prev: Record<string, any>) => ({ ...prev, mpesaPasskey: e.target.value }))}
-                    />
-                  </div>
-                </div>
-              )}
 
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-medium">Card Payments</h3>
-                  <p className="text-sm text-gray-600">Accept credit and debit card payments</p>
+                  <p className="text-sm text-gray-600">
+                    Accept credit and debit card payments
+                  </p>
                 </div>
                 <Switch
                   checked={paymentSettings.cardPaymentsEnabled}
-                  onCheckedChange={(checked) => setPaymentSettings((prev: Record<string, any>) => ({ ...prev, cardPaymentsEnabled: checked }))}
+                  onCheckedChange={(checked) =>
+                    setPaymentSettings((prev) => ({
+                      ...prev,
+                      cardPaymentsEnabled: checked,
+                    }))
+                  }
                 />
               </div>
 
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-medium">Cash on Delivery</h3>
-                  <p className="text-sm text-gray-600">Allow customers to pay upon delivery</p>
+                  <p className="text-sm text-gray-600">
+                    Allow customers to pay upon delivery
+                  </p>
                 </div>
                 <Switch
                   checked={paymentSettings.codEnabled}
-                  onCheckedChange={(checked) => setPaymentSettings((prev: Record<string, any>) => ({ ...prev, codEnabled: checked }))}
+                  onCheckedChange={(checked) =>
+                    setPaymentSettings((prev) => ({ ...prev, codEnabled: checked }))
+                  }
                 />
               </div>
             </div>
@@ -278,7 +321,12 @@ const SettingsPanel = () => {
                   id="standardShippingFee"
                   type="number"
                   value={shippingSettings.standardShippingFee}
-                  onChange={(e) => setShippingSettings((prev: Record<string, any>) => ({ ...prev, standardShippingFee: e.target.value }))}
+                  onChange={(e) =>
+                    setShippingSettings((prev) => ({
+                      ...prev,
+                      standardShippingFee: e.target.value,
+                    }))
+                  }
                 />
               </div>
               <div className="space-y-2">
@@ -287,7 +335,12 @@ const SettingsPanel = () => {
                   id="expressShippingFee"
                   type="number"
                   value={shippingSettings.expressShippingFee}
-                  onChange={(e) => setShippingSettings((prev: Record<string, any>) => ({ ...prev, expressShippingFee: e.target.value }))}
+                  onChange={(e) =>
+                    setShippingSettings((prev) => ({
+                      ...prev,
+                      expressShippingFee: e.target.value,
+                    }))
+                  }
                 />
               </div>
             </div>
@@ -296,22 +349,36 @@ const SettingsPanel = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-medium">Free Shipping</h3>
-                  <p className="text-sm text-gray-600">Offer free shipping for orders above threshold</p>
+                  <p className="text-sm text-gray-600">
+                    Offer free shipping for orders above threshold
+                  </p>
                 </div>
                 <Switch
                   checked={shippingSettings.freeShippingEnabled}
-                  onCheckedChange={(checked) => setShippingSettings((prev: Record<string, any>) => ({ ...prev, freeShippingEnabled: checked }))}
+                  onCheckedChange={(checked) =>
+                    setShippingSettings((prev) => ({
+                      ...prev,
+                      freeShippingEnabled: checked,
+                    }))
+                  }
                 />
               </div>
 
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-medium">Same Day Delivery</h3>
-                  <p className="text-sm text-gray-600">Enable same day delivery option</p>
+                  <p className="text-sm text-gray-600">
+                    Enable same day delivery option
+                  </p>
                 </div>
                 <Switch
                   checked={shippingSettings.sameDayDeliveryEnabled}
-                  onCheckedChange={(checked) => setShippingSettings((prev: Record<string, any>) => ({ ...prev, sameDayDeliveryEnabled: checked }))}
+                  onCheckedChange={(checked) =>
+                    setShippingSettings((prev) => ({
+                      ...prev,
+                      sameDayDeliveryEnabled: checked,
+                    }))
+                  }
                 />
               </div>
             </div>
@@ -337,7 +404,12 @@ const SettingsPanel = () => {
                 </div>
                 <Switch
                   checked={notificationSettings.emailNotifications}
-                  onCheckedChange={(checked) => setNotificationSettings((prev: Record<string, any>) => ({ ...prev, emailNotifications: checked }))}
+                  onCheckedChange={(checked) =>
+                    setNotificationSettings((prev) => ({
+                      ...prev,
+                      emailNotifications: checked,
+                    }))
+                  }
                 />
               </div>
 
@@ -348,7 +420,12 @@ const SettingsPanel = () => {
                 </div>
                 <Switch
                   checked={notificationSettings.smsNotifications}
-                  onCheckedChange={(checked) => setNotificationSettings((prev: Record<string, any>) => ({ ...prev, smsNotifications: checked }))}
+                  onCheckedChange={(checked) =>
+                    setNotificationSettings((prev) => ({
+                      ...prev,
+                      smsNotifications: checked,
+                    }))
+                  }
                 />
               </div>
 
@@ -359,34 +436,56 @@ const SettingsPanel = () => {
                 </div>
                 <Switch
                   checked={notificationSettings.orderConfirmations}
-                  onCheckedChange={(checked) => setNotificationSettings((prev: Record<string, any>) => ({ ...prev, orderConfirmations: checked }))}
+                  onCheckedChange={(checked) =>
+                    setNotificationSettings((prev) => ({
+                      ...prev,
+                      orderConfirmations: checked,
+                    }))
+                  }
                 />
               </div>
 
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-medium">Low Stock Alerts</h3>
-                  <p className="text-sm text-gray-600">Get notified when products are low in stock</p>
+                  <p className="text-sm text-gray-600">
+                    Get notified when products are low in stock
+                  </p>
                 </div>
                 <Switch
                   checked={notificationSettings.lowStockAlerts}
-                  onCheckedChange={(checked) => setNotificationSettings((prev: Record<string, any>) => ({ ...prev, lowStockAlerts: checked }))}
+                  onCheckedChange={(checked) =>
+                    setNotificationSettings((prev) => ({
+                      ...prev,
+                      lowStockAlerts: checked,
+                    }))
+                  }
                 />
               </div>
 
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-medium">New Order Alerts</h3>
-                  <p className="text-sm text-gray-600">Get notified of new customer orders</p>
+                  <p className="text-sm text-gray-600">
+                    Get notified of new customer orders
+                  </p>
                 </div>
                 <Switch
                   checked={notificationSettings.newOrderAlerts}
-                  onCheckedChange={(checked) => setNotificationSettings((prev: Record<string, any>) => ({ ...prev, newOrderAlerts: checked }))}
+                  onCheckedChange={(checked) =>
+                    setNotificationSettings((prev) => ({
+                      ...prev,
+                      newOrderAlerts: checked,
+                    }))
+                  }
                 />
               </div>
             </div>
 
-            <Button onClick={handleSaveNotificationSettings} className="bg-blue-600 hover:bg-blue-700">
+            <Button
+              onClick={handleSaveNotificationSettings}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
               Save Notification Settings
             </Button>
           </CardContent>

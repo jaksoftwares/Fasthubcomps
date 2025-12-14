@@ -147,7 +147,6 @@ const CustomersTable = () => {
                   <tr key={customer.id} className="border-b hover:bg-gray-50">
                     <td className="py-3 px-4">
                       <div className="font-medium text-gray-900">{customer.name}</div>
-                      <div className="text-sm text-gray-600">ID: {customer.id}</div>
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center space-x-1 text-sm text-gray-600 mb-1">

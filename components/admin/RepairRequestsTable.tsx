@@ -52,6 +52,11 @@ const RepairRequestsTable = () => {
       }))
     : [];
 
+  const formatRequestCode = (id: string) => {
+    if (!id) return '';
+    return `REQ-${id.slice(0, 8).toUpperCase()}`;
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending':
@@ -196,7 +201,7 @@ const RepairRequestsTable = () => {
             <tbody>
               {filteredRequests.map((request) => (
                 <tr key={request.id} className="border-b hover:bg-gray-50">
-                  <td className="py-3 px-4 font-medium text-blue-600">{request.id}</td>
+                  <td className="py-3 px-4 font-medium text-blue-600">{formatRequestCode(request.id)}</td>
                   <td className="py-3 px-4">
                     <div>
                       <div className="font-medium text-gray-900">{request.customerName}</div>

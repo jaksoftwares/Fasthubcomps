@@ -19,7 +19,12 @@ export async function GET() {
     .limit(1)
     .single();
 
+  // PGRST116 = no rows found for single(), treat as "no settings yet"
   if (error) {
+    if ((error as any).code === "PGRST116") {
+      return NextResponse.json({});
+    }
+
     console.error("❌ Error fetching settings:", error.message);
     return NextResponse.json({ error: "Failed to fetch settings" }, { status: 500 });
   }
