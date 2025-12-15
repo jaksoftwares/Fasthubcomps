@@ -15,7 +15,20 @@ export async function POST(req: Request) {
     });
 
     if (authError || !authData?.user) {
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+      const message = authError?.message?.toLowerCase() || "";
+
+      // Detect unconfirmed email/login blocked until confirmation
+      if (
+        authError?.status === 400 &&
+        (message.includes("confirm") || message.includes("email not confirmed"))
+      ) {
+        return NextResponse.json(
+          { error: "Please confirm your email from the link we sent before logging in." },
+          { status: 403 }
+        );
+      }
+
+      return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
     }
 
     // Get role from user metadata
@@ -34,6 +47,6 @@ export async function POST(req: Request) {
       token: authData.session?.access_token
     });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: "Unable to log you in right now. Please try again." }, { status: 500 });
   }
 }

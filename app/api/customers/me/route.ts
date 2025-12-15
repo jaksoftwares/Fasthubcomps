@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { getSupabaseServerClient } from "@/lib/supabaseClient";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 // GET /api/customers/me
 export async function GET() {
-  const supabase = getSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
 
   // Try to get the authenticated user
   const {

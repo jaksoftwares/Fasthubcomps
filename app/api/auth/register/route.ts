@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getSupabaseServerClient } from "@/lib/supabaseClient";
 
 export async function POST(req: Request) {
   try {
     const { name, email, password, phone = null, isAdmin = false } = await req.json();
     if (!name || !email || !password) return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
 
-    // Create Supabase auth user
-    const { data, error } = await supabase.auth.signUp({
+    // Create Supabase auth user (uses anon key + cookies)
+    const supabaseAuth = await createSupabaseServerClient();
+    const { data, error } = await supabaseAuth.auth.signUp({
       email,
       password,
       options: {
@@ -26,15 +26,16 @@ export async function POST(req: Request) {
       if (error.message?.includes('already registered') || error.message?.includes('User already registered')) {
         return NextResponse.json({ error: "Email already registered" }, { status: 409 });
       }
-      return NextResponse.json({ error: error.message || "Registration failed" }, { status: 500 });
+      return NextResponse.json({ error: error.message || "Registration failed during auth sign up" }, { status: 500 });
     }
 
     if (!data.user) {
       return NextResponse.json({ error: "Registration failed - no user created" }, { status: 500 });
     }
 
-    // Insert into customers table
-    const { error: insertError } = await supabase
+    // Insert into customers table using service client (server-only)
+    const supabaseService = getSupabaseServerClient();
+    const { error: insertError } = await supabaseService
       .from('customers')
       .insert([{
         id: data.user.id,
@@ -47,8 +48,9 @@ export async function POST(req: Request) {
 
     if (insertError) {
       // If insert fails, delete the auth user
-      await supabase.auth.admin.deleteUser(data.user.id);
-      return NextResponse.json({ error: 'Failed to create customer profile' }, { status: 500 });
+      const deleteResult = await supabaseService.auth.admin.deleteUser(data.user.id);
+      const details = insertError.message || 'Unknown error inserting customer';
+      return NextResponse.json({ error: 'Failed to create customer profile', details }, { status: 500 });
     }
 
     // Check if user is auto-confirmed (has session)
