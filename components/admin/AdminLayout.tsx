@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, Package, ShoppingCart, Wrench, Users, Settings, Menu, X, LogOut, Chrome as Home } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, Wrench, Users, Settings, Menu, X, LogOut, Chrome as Home, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
@@ -18,6 +18,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const mainNavigation = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Products', href: '/admin/products', icon: Package },
+    { name: 'Categories', href: '/admin/categories', icon: Layers },
     { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
     { name: 'Repairs', href: '/admin/repairs', icon: Wrench },
     { name: 'Customers', href: '/admin/customers', icon: Users },
