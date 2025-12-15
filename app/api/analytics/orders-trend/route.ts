@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSupabaseServerClient } from "@/lib/supabase/server"; 
+import { createSupabaseServerClient } from "@/lib/supabase/server"; 
 
 type TrendRecord = {
   total_orders: number;
@@ -7,7 +7,7 @@ type TrendRecord = {
 };
 
 export async function GET() {
-  const supabase = getSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
 
   const { data, error } = await supabase
     .from("orders")

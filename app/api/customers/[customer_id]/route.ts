@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
-import { getSupabaseServerClient } from "@/lib/supabase/server"; // ✅ correct import
+import { createSupabaseServerClient } from "@/lib/supabase/server"; // ✅ correct import
 import bcrypt from "bcryptjs";
 
 // ✅ GET /api/customers/[customer_id]
@@ -8,7 +8,7 @@ export async function GET(
   { params }: { params: Promise<{ customer_id: string }> }
 ) {
   const { customer_id } = await params;
-  const supabase = getSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
 
   const { data, error } = await supabase
     .from("customers")
@@ -29,7 +29,7 @@ export async function PUT(
   { params }: { params: Promise<{ customer_id: string }> }
 ) {
   const { customer_id } = await params;
-  const supabase = getSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
   const body = await req.json();
   const updateData: Record<string, any> = { ...body };
 
@@ -58,7 +58,7 @@ export async function DELETE(
   { params }: { params: Promise<{ customer_id: string }> }
 ) {
   const { customer_id } = await params;
-  const supabase = getSupabaseServerClient();
+  const supabase = await createSupabaseServerClient();
 
   const { error } = await supabase
     .from("customers")
