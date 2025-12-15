@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { createSupabaseServerClient } from "@/lib/supabase/server"; // ✅ use your consistent server helper
+import { getSupabaseServerClient } from "@/lib/supabaseClient"; // ✅ use your consistent server helper
 import bcrypt from "bcryptjs";
 
 // ✅ GET /api/customers - list all customers
 export async function GET() {
-  const supabase = await createSupabaseServerClient();
+  const supabase = getSupabaseServerClient();
 
   const { data, error } = await supabase
     .from("customers")
@@ -20,7 +20,7 @@ export async function GET() {
 
 // ✅ POST /api/customers - create new customer
 export async function POST(req: Request) {
-  const supabase = await createSupabaseServerClient();
+  const supabase = getSupabaseServerClient();
   const body = await req.json();
 
   const { name, email, password, phone } = body;

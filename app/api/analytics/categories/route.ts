@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getSupabaseServerClient } from "@/lib/supabaseClient";
 
 type CategoryStat = {
   total_value: number;
@@ -7,7 +7,7 @@ type CategoryStat = {
 };
 
 export async function GET() {
-  const supabase = await createSupabaseServerClient();
+  const supabase = getSupabaseServerClient();
 
   const { data, error } = await supabase
     .from("products")
