@@ -482,8 +482,8 @@ const Header = () => {
                 <span className="hidden sm:inline font-semibold">Categories</span>
               </Button>
 
-              {/* Logo */}
-              <Link href="/" className="flex items-center space-x-2">
+              {/* Logo (image only) */}
+              <Link href="/" className="flex items-center">
                 <Image
                   src="/fasthub-logo.jpg"
                   alt="FastHub Computers"
@@ -491,10 +491,6 @@ const Header = () => {
                   height={50}
                   className="h-10 sm:h-14 w-auto"
                 />
-                <div className="hidden sm:flex flex-col leading-tight">
-                  <span className="text-2xl font-bold text-orange-600">FastHub</span>
-                  <span className="text-sm font-semibold text-blue-600 uppercase tracking-wide">Computers</span>
-                </div>
               </Link>
             </div>
 

@@ -10,30 +10,22 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center">
               <Image
                 src="/fasthub-logo.jpg"
                 alt="FastHub Computers"
                 width={200}
                 height={80}
-                className="h-16 sm:h-20 w-auto"
+                className="h-12 sm:h-16 w-auto object-contain drop-shadow-sm"
+                style={{ background: 'transparent' }}
                 priority
               />
-              <div className="hidden sm:flex flex-col leading-tight">
-                <span className="text-xl sm:text-2xl font-bold text-orange-500">FastHub</span>
-                <span className="text-xs sm:text-sm font-semibold text-blue-400 uppercase tracking-wide">Computers</span>
-              </div>
             </div>
-            
-            {/* Mobile Logo Text */}
-            <div className="sm:hidden text-center">
-              <span className="text-lg font-bold text-orange-500">FastHub</span>
-              <span className="block text-xs font-semibold text-blue-400 uppercase tracking-wide">Computers</span>
-            </div>
-            
+
             <p className="text-gray-300 text-sm leading-relaxed">
               Unlocking your IT needs with quality computers, laptops, phones, and professional repair services.
             </p>
+
             <div className="flex space-x-4">
               <Link
                 href="https://x.com/fasthubcomps"
