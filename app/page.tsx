@@ -1,6 +1,5 @@
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import Breadcrumb from '@/components/layout/Breadcrumb';
 import FeaturedProducts from '@/components/home/FeaturedProducts';
 import Categories from '@/components/home/Categories';
 import TopSales from '@/components/home/TopSales';
@@ -127,7 +126,7 @@ export default async function Home() {
 	return (
 		<div className="min-h-screen bg-gray-50">
 			<Header />
-			<Breadcrumb showOnHome />
+			{/* Breadcrumb removed from home page */}
 			<main>
 				{/* Best Deals - Limited time offers - PROMINENT */}
 				<BestDeals initialProducts={bestDeals} />
