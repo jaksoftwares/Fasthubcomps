@@ -484,6 +484,13 @@ const Header = () => {
 
               {/* Logo (image only) */}
               <Link href="/" className="flex items-center">
+                {/* <Image
+                  src="/fasthub-logo-image.jpg"
+                  alt="FastHub Logo"
+                  width={200}
+                  height={72}
+                  className="h-12 sm:h-20 w-auto -mr-[32px]"
+                /> */}
                 <Image
                   src="/fasthub-logo.jpg"
                   alt="FastHub Computers"
