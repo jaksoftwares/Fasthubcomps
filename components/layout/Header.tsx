@@ -487,9 +487,9 @@ const Header = () => {
                 <Image
                   src="/fasthub-logo.jpg"
                   alt="FastHub Computers"
-                  width={140}
-                  height={50}
-                  className="h-10 sm:h-14 w-auto"
+                  width={200}
+                  height={72}
+                  className="h-12 sm:h-20 w-auto"
                 />
               </Link>
             </div>
