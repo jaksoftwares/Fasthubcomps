@@ -1,85 +1,79 @@
 import AdminLayout from '@/components/admin/AdminLayout';
 import Link from 'next/link';
 import { getSupabaseServerClient } from '@/lib/supabaseClient';
+import { TrendingUp, ShoppingCart, Users, Package, Zap, BarChart3 } from 'lucide-react';
+import AdminDashboardClient from '@/components/admin/AdminDashboardClient';
 
 export const revalidate = 60;
 
 async function getAdminDashboardStats() {
   const supabase = getSupabaseServerClient();
 
-  const [products, customers, orders, payments] = await Promise.all([
+  // Fetch all data needed for accurate statistics
+  const [products, customers, orders, payments, ordersDetail, customersDetail] = await Promise.all([
     supabase.from('products').select('id', { count: 'exact', head: true }),
     supabase.from('customers').select('id', { count: 'exact', head: true }),
-    supabase.from('orders').select('id', { count: 'exact', head: true }),
+    supabase.from('orders').select('id,created_at', { count: 'exact' }),
     supabase.from('payments').select('amount,status'),
+    supabase.from('orders').select('*'),
+    supabase.from('customers').select('*'),
   ]);
 
   const totalRevenue = payments.data?.filter((p: any) => p.status === 'success')
     .reduce((sum: number, p: any) => sum + Number(p.amount), 0) || 0;
 
+  // Calculate actual trends based on current month
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+  const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
+
+  // Count new customers this month
+  const newCustomersThisMonth = (customersDetail.data || []).filter((c: any) => {
+    const createdDate = new Date(c.created_at);
+    return createdDate >= firstDayOfMonth && createdDate <= now;
+  }).length;
+
+  // Count new orders this month
+  const newOrdersThisMonth = (ordersDetail.data || []).filter((o: any) => {
+    const createdDate = new Date(o.created_at);
+    return createdDate >= firstDayOfMonth && createdDate <= now;
+  }).length;
+
+  // Calculate fulfilled orders
+  const fulfilledOrders = (ordersDetail.data || []).filter((o: any) => 
+    o.status === 'completed' || o.status === 'shipped'
+  ).length;
+
+  const totalOrders = orders.count || 0;
+  const totalProducts = products.count || 0;
+  const totalCustomers = customers.count || 0;
+  const fulfillmentRate = totalOrders > 0 ? Math.round((fulfilledOrders / totalOrders) * 100) : 0;
+
   return {
-    totalProducts: products.count || 0,
-    totalCustomers: customers.count || 0,
-    totalOrders: orders.count || 0,
+    totalProducts,
+    totalCustomers,
+    totalOrders,
     totalRevenue,
+    newCustomersThisMonth,
+    newOrdersThisMonth,
+    fulfillmentRate,
+    fulfilledOrders,
   };
 }
 
 export default async function AdminDashboardPage() {
   const stats = await getAdminDashboardStats();
 
+  const formattedRevenue = new Intl.NumberFormat('en-KE', {
+    style: 'currency',
+    currency: 'KES',
+    minimumFractionDigits: 0,
+  }).format(stats.totalRevenue);
+
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-6xl mx-auto space-y-8">
-          <header className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
-              <p className="text-sm text-gray-600 mt-1">Key store metrics based on live data.</p>
-            </div>
-          </header>
-
-          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="rounded-md border bg-white p-4">
-              <p className="text-xs font-medium text-gray-500">Total Products</p>
-              <p className="mt-2 text-2xl font-semibold text-gray-900">{stats.totalProducts}</p>
-            </div>
-            <div className="rounded-md border bg-white p-4">
-              <p className="text-xs font-medium text-gray-500">Total Orders</p>
-              <p className="mt-2 text-2xl font-semibold text-gray-900">{stats.totalOrders}</p>
-            </div>
-            <div className="rounded-md border bg-white p-4">
-              <p className="text-xs font-medium text-gray-500">Total Customers</p>
-              <p className="mt-2 text-2xl font-semibold text-gray-900">{stats.totalCustomers}</p>
-            </div>
-            <div className="rounded-md border bg-white p-4">
-              <p className="text-xs font-medium text-gray-500">Total Revenue</p>
-              <p className="mt-2 text-2xl font-semibold text-gray-900">
-                {new Intl.NumberFormat('en-KE', {
-                  style: 'currency',
-                  currency: 'KES',
-                  minimumFractionDigits: 0,
-                }).format(stats.totalRevenue)}
-              </p>
-            </div>
-          </section>
-
-          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <Link href="/admin/products" className="rounded-md border bg-white p-4 hover:border-gray-400 transition-colors">
-              <h2 className="text-sm font-semibold text-gray-900">Products</h2>
-              <p className="mt-1 text-sm text-gray-600">Manage product catalog, pricing, and availability.</p>
-            </Link>
-            <Link href="/admin/orders" className="rounded-md border bg-white p-4 hover:border-gray-400 transition-colors">
-              <h2 className="text-sm font-semibold text-gray-900">Orders</h2>
-              <p className="mt-1 text-sm text-gray-600">Review and update customer orders.</p>
-            </Link>
-            <Link href="/admin/customers" className="rounded-md border bg-white p-4 hover:border-gray-400 transition-colors">
-              <h2 className="text-sm font-semibold text-gray-900">Users</h2>
-              <p className="mt-1 text-sm text-gray-600">View customers and admin users.</p>
-            </Link>
-          </section>
-        </div>
-      </div>
+      <AdminDashboardClient stats={stats} formattedRevenue={formattedRevenue} />
     </AdminLayout>
   );
 }
