@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,7 +12,7 @@ import { ProductsAPI } from '@/lib/services/products';
 import EditProductModal from '@/components/admin/EditProductModal';
 import Image from 'next/image';
 
-const ProductsTable = () => {
+const ProductsTable = forwardRef((props, ref) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -20,26 +20,32 @@ const ProductsTable = () => {
   const [editingProduct, setEditingProduct] = useState<any | null>(null);
   const [categories, setCategories] = useState<any[]>([]);
 
-  useEffect(() => {
-    const fetchInitialData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const [productsData, categoriesRes] = await Promise.all([
-          ProductsAPI.getAll(),
-          fetch('/api/categories').then((res) => res.json()).catch(() => []),
-        ]);
+  const fetchProducts = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [productsData, categoriesRes] = await Promise.all([
+        ProductsAPI.getAll(),
+        fetch('/api/categories').then((res) => res.json()).catch(() => []),
+      ]);
 
-        setProducts(Array.isArray(productsData) ? productsData : []);
-        setCategories(Array.isArray(categoriesRes) ? categoriesRes : []);
-      } catch (err: any) {
-        setError(err?.message || 'Failed to fetch products');
-        toast.error(err?.message || 'Failed to fetch products');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchInitialData();
+      setProducts(Array.isArray(productsData) ? productsData : []);
+      setCategories(Array.isArray(categoriesRes) ? categoriesRes : []);
+    } catch (err: any) {
+      setError(err?.message || 'Failed to fetch products');
+      toast.error(err?.message || 'Failed to fetch products');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Expose refreshProducts method via ref
+  useImperativeHandle(ref, () => ({
+    refreshProducts: fetchProducts,
+  }));
+
+  useEffect(() => {
+    fetchProducts();
   }, []);
 
   if (loading) {
@@ -225,6 +231,8 @@ const ProductsTable = () => {
       )}
     </>
   );
-};
+});
+
+ProductsTable.displayName = 'ProductsTable';
 
 export default ProductsTable;

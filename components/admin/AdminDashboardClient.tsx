@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
-import { TrendingUp, ShoppingCart, Users, Package, Zap, BarChart3, User, Mail, Clock } from 'lucide-react';
+import { TrendingUp, ShoppingCart, Users, Package, Zap, BarChart3 } from 'lucide-react';
 
 interface AdminDashboardClientProps {
   stats: {
@@ -77,12 +77,6 @@ const ActionCard = ({
 const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ stats, formattedRevenue }) => {
   const { user, isLoading } = useAuth();
 
-  // Format current date for display
-  const currentDate = useMemo(() => {
-    const date = new Date();
-    return date.toLocaleDateString('en-KE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-  }, []);
-
   const getTrendMessage = (value: number, label: string) => {
     if (value === 0) return 'No new ' + label.toLowerCase() + ' yet';
     if (value === 1) return `${value} new ${label.toLowerCase().slice(0, -1)}`;
@@ -92,35 +86,6 @@ const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({ stats, form
   return (
     <div className="w-full h-full bg-gradient-to-br from-gray-50 via-white to-gray-50">
       <div className="w-full px-4 py-8 lg:px-8 space-y-8">
-        {/* Admin User Info Section */}
-        {!isLoading && user && (
-          <div className="rounded-lg border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 p-6 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="p-3 rounded-full bg-blue-500 text-white">
-                  <User className="h-6 w-6" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Signed in as</p>
-                  <h2 className="text-2xl font-bold text-gray-900">{user.name || user.email}</h2>
-                  <div className="flex items-center space-x-2 mt-1 text-sm text-gray-600">
-                    <Mail className="h-4 w-4" />
-                    <span>{user.email}</span>
-                  </div>
-                  <div className="flex items-center space-x-2 mt-1 text-xs text-blue-700 font-medium">
-                    <Clock className="h-3 w-3" />
-                    <span>{currentDate}</span>
-                  </div>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide">Admin</p>
-                <p className="text-sm font-semibold text-gray-900 mt-1">Full Access</p>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Header */}
         <div className="flex flex-col space-y-2">
           <h1 className="text-4xl font-bold text-gray-900">Dashboard</h1>

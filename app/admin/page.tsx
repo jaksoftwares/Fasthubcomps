@@ -1,7 +1,5 @@
 import AdminLayout from '@/components/admin/AdminLayout';
-import Link from 'next/link';
 import { getSupabaseServerClient } from '@/lib/supabaseClient';
-import { TrendingUp, ShoppingCart, Users, Package, Zap, BarChart3 } from 'lucide-react';
 import AdminDashboardClient from '@/components/admin/AdminDashboardClient';
 
 export const revalidate = 60;

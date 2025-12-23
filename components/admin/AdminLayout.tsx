@@ -4,11 +4,12 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { LayoutDashboard, Package, ShoppingCart, Wrench, Users, Settings, Menu, X, LogOut, Chrome as Home, Layers } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, Wrench, Users, Settings, Menu, X, LogOut, Chrome as Home, Layers, User, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const { user, isLoading } = useAuth();
@@ -113,6 +114,49 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
         </nav>
 
         <div className="mt-auto px-2 py-4 border-t border-gray-200 space-y-2">
+          {/* Profile Section */}
+          {!isLoading && user && (
+            <div className="relative mb-4">
+              <button
+                onClick={() => setProfileOpen(!profileOpen)}
+                className="w-full px-3 py-3 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 hover:border-blue-300 transition-colors text-left"
+              >
+                <div className="flex items-center space-x-2">
+                  <div className="p-2 rounded-full bg-blue-500 text-white">
+                    <User className="h-4 w-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-gray-500 uppercase">Admin</p>
+                    <p className="text-sm font-semibold text-gray-900 truncate">{user.name || user.email}</p>
+                  </div>
+                </div>
+              </button>
+
+              {/* Profile Dropdown */}
+              {profileOpen && (
+                <>
+                  {/* Backdrop for mobile */}
+                  <div
+                    className="fixed inset-0 lg:hidden"
+                    onClick={() => setProfileOpen(false)}
+                  />
+                  <div className="absolute bottom-full left-0 right-0 mb-2 p-3 bg-white rounded-lg border border-gray-200 shadow-lg z-50">
+                    <div className="space-y-2">
+                      <div className="px-3 py-2 bg-gray-50 rounded-md">
+                        <p className="text-xs text-gray-600">Signed in as</p>
+                        <p className="text-sm font-semibold text-gray-900">{user.name || 'Admin'}</p>
+                        <div className="flex items-center space-x-1 mt-1 text-xs text-gray-600">
+                          <Mail className="h-3 w-3" />
+                          <span className="truncate">{user.email}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
           <Link href="/">
             <Button variant="outline" className="w-full justify-start text-sm">
               <Home className="h-4 w-4 mr-2" />

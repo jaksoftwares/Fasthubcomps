@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
@@ -14,6 +14,7 @@ const AdminProductsPage = () => {
   const { user, isLoading } = useAuth();
   const router = useRouter();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const productsTableRef = useRef<{ refreshProducts: () => Promise<void> }>(null);
 
   useEffect(() => {
     if (!isLoading && (!user || user.role !== 'admin')) {
@@ -50,11 +51,15 @@ const AdminProductsPage = () => {
           </Button>
         </div>
 
-        <ProductsTable />
+        <ProductsTable ref={productsTableRef} />
 
         <AddProductModal
           isOpen={isAddModalOpen}
           onClose={() => setIsAddModalOpen(false)}
+          onProductAdded={async () => {
+            setIsAddModalOpen(false);
+            await productsTableRef.current?.refreshProducts();
+          }}
         />
       </div>
     </AdminLayout>
