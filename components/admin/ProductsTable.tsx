@@ -41,6 +41,32 @@ const ProductsTable = () => {
     fetchInitialData();
   }, []);
 
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>All Products</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="py-6 text-center">Loading products...</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>All Products</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="py-6 text-center text-red-500">{error}</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const getCategoryName = (categoryId: string | null | undefined) => {
     if (!categoryId) return '-';
     const match = categories.find((c) => c.id === categoryId);
@@ -78,6 +104,17 @@ const ProductsTable = () => {
     }
   };
 
+  // Prepare filtered list for rendering
+  const term = searchTerm.toLowerCase();
+  const filtered = products.filter(product => {
+    const categoryName = getCategoryName(product.category_id || null).toLowerCase();
+    return (
+      product.name?.toLowerCase().includes(term) ||
+      product.brand?.toLowerCase().includes(term) ||
+      categoryName.includes(term)
+    );
+  });
+
   return (
     <>
       <Card>
@@ -110,67 +147,64 @@ const ProductsTable = () => {
                 </tr>
               </thead>
               <tbody>
-                {products.filter(product => {
-                  const term = searchTerm.toLowerCase();
-                  const categoryName = getCategoryName(product.category_id || null).toLowerCase();
-                  return (
-                    product.name?.toLowerCase().includes(term) ||
-                    product.brand?.toLowerCase().includes(term) ||
-                    categoryName.includes(term)
-                  );
-                }).map((product) => {
-                  // Use first image from images array if available
-                  const imageUrl = Array.isArray(product.images) && product.images.length > 0
-                    ? product.images[0]
-                    : '/placeholder.png'; // fallback placeholder
-                  return (
-                    <tr key={product.id} className="border-b hover:bg-gray-50">
-                      <td className="py-3 px-4">
-                        <div className="flex items-center space-x-3">
-                          <Image
-                            src={imageUrl}
-                            alt={product.name}
-                            width={40}
-                            height={40}
-                            className="w-10 h-10 rounded-md object-cover"
-                          />
-                          <span className="font-medium text-gray-900">{product.name}</span>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-gray-600">{getCategoryName(product.category_id || null)}</td>
-                      <td className="py-3 px-4 text-gray-600">{product.brand}</td>
-                      <td className="py-3 px-4 font-medium">{formatPrice(product.price)}</td>
-                      <td className="py-3 px-4">
-                        <span className={`${product.stock <= 5 ? 'text-red-600' : 'text-gray-600'}`}>
-                          {product.stock}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4">
-                        <Badge className={getStatusColor(product.status)}>
-                          {product.status?.replace('_', ' ')}
-                        </Badge>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center space-x-2">
-                          <Button size="sm" variant="outline">
-                            <Eye className="h-3 w-3" />
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={() => setEditingProduct(product)}>
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => handleDelete(product.id)}
-                            className="text-red-600 hover:text-red-700"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                {filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-6 px-4 text-center text-sm text-gray-500">No products found.</td>
+                  </tr>
+                ) : (
+                  filtered.map((product) => {
+                    const imageUrl = Array.isArray(product.images) && product.images.length > 0
+                      ? product.images[0]
+                      : '/placeholder.png';
+                    return (
+                      <tr key={product.id} className="border-b hover:bg-gray-50">
+                        <td className="py-3 px-4">
+                          <div className="flex items-center space-x-3">
+                            <Image
+                              src={imageUrl}
+                              alt={product.name}
+                              width={40}
+                              height={40}
+                              className="w-10 h-10 rounded-md object-cover"
+                            />
+                            <span className="font-medium text-gray-900">{product.name}</span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-gray-600">{getCategoryName(product.category_id || null)}</td>
+                        <td className="py-3 px-4 text-gray-600">{product.brand}</td>
+                        <td className="py-3 px-4 font-medium">{formatPrice(product.price)}</td>
+                        <td className="py-3 px-4">
+                          <span className={`${product.stock <= 5 ? 'text-red-600' : 'text-gray-600'}`}>
+                            {product.stock}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <Badge className={getStatusColor(product.status)}>
+                            {product.status?.replace('_', ' ')}
+                          </Badge>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center space-x-2">
+                            <Button size="sm" variant="outline">
+                              <Eye className="h-3 w-3" />
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={() => setEditingProduct(product)}>
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleDelete(product.id)}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
           </div>
