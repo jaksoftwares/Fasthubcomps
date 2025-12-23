@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { AnalyticsAPI } from '@/lib/services/analytics';
+import Loader from '@/components/ui/Loader';
 
 interface SalesData {
   month: string;
@@ -38,11 +39,29 @@ const SalesChart = () => {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Sales Overview</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Loader message="Loading sales data..." />
+        </CardContent>
+      </Card>
+    );
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Sales Overview</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-red-600">Error: {error}</div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
