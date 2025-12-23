@@ -423,78 +423,37 @@ const ProductDetailPage = () => {
 
 // Image Magnifier Component with Hover Zoom Effect
 const ImageMagnifier = ({ src, alt, discount }: { src: string; alt: string; discount: number }) => {
-	const [showMagnifier, setShowMagnifier] = useState(false);
-	const [magnifierPosition, setMagnifierPosition] = useState({ x: 0, y: 0 });
-	const [imgSize, setImgSize] = useState({ width: 0, height: 0 });
+	const [isHovering, setIsHovering] = useState(false);
 	const imgRef = useRef<HTMLDivElement>(null);
-
-	const handleMouseEnter = () => {
-		setShowMagnifier(true);
-	};
-
-	const handleMouseLeave = () => {
-		setShowMagnifier(false);
-	};
-
-	const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-		if (!imgRef.current) return;
-
-		const rect = imgRef.current.getBoundingClientRect();
-		const x = e.clientX - rect.left;
-		const y = e.clientY - rect.top;
-
-		setMagnifierPosition({ x, y });
-
-		if (imgSize.width === 0) {
-			setImgSize({ width: rect.width, height: rect.height });
-		}
-	};
-
-	const magnifierSize = 150;
-	const zoomLevel = 2.5;
 
 	return (
 		<div
 			ref={imgRef}
-			className="relative w-full h-64 md:h-80 bg-white cursor-crosshair overflow-hidden"
-			onMouseEnter={handleMouseEnter}
-			onMouseLeave={handleMouseLeave}
-			onMouseMove={handleMouseMove}
+			className="relative w-full h-64 md:h-80 bg-white cursor-zoom-in overflow-hidden"
+			onMouseEnter={() => setIsHovering(true)}
+			onMouseLeave={() => setIsHovering(false)}
 		>
-			<Image
-				src={src}
-				alt={alt}
-				fill
-				className="object-contain p-4"
-				priority
-			/>
+			<div className="relative w-full h-full overflow-hidden">
+				<Image
+					src={src}
+					alt={alt}
+					fill
+					className={`object-contain p-4 transition-transform duration-300 ease-in-out ${
+						isHovering ? 'scale-150' : 'scale-100'
+					}`}
+					priority
+				/>
+			</div>
 			
 			{discount > 0 && (
-				<Badge className="absolute top-3 left-3 bg-red-500 text-white text-xs px-2 py-0.5">
+				<Badge className="absolute top-3 left-3 bg-red-500 text-white text-xs px-2 py-0.5 z-10">
 					-{discount}%
 				</Badge>
 			)}
 
-			<div className="absolute bottom-3 right-3 bg-black/60 text-white rounded-full p-1.5">
+			<div className="absolute bottom-3 right-3 bg-black/60 text-white rounded-full p-1.5 z-10">
 				<ZoomIn className="h-4 w-4" />
 			</div>
-
-			{showMagnifier && (
-				<div
-					className="absolute border-2 border-gray-400 bg-white rounded-full pointer-events-none shadow-xl"
-					style={{
-						width: `${magnifierSize}px`,
-						height: `${magnifierSize}px`,
-						left: `${magnifierPosition.x - magnifierSize / 2}px`,
-						top: `${magnifierPosition.y - magnifierSize / 2}px`,
-						backgroundImage: `url(${src})`,
-						backgroundSize: `${imgSize.width * zoomLevel}px ${imgSize.height * zoomLevel}px`,
-						backgroundPositionX: `-${magnifierPosition.x * zoomLevel - magnifierSize / 2}px`,
-						backgroundPositionY: `-${magnifierPosition.y * zoomLevel - magnifierSize / 2}px`,
-						backgroundRepeat: 'no-repeat',
-					}}
-				/>
-			)}
 		</div>
 	);
 };

@@ -31,6 +31,32 @@ const Header = () => {
   const { state: wishlistState } = useWishlist();
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
   const { user, logout } = useAuth();
+  const [isAccountOpen, setIsAccountOpen] = useState(false);
+  const [displayUser, setDisplayUser] = useState<any | null>(null);
+
+  // Keep a local displayUser in sync with context user and localStorage
+  useEffect(() => {
+    // Always prioritize context user over localStorage
+    if (user) {
+      setDisplayUser(user);
+      return;
+    }
+
+    // Only use localStorage if context user is null (not yet loaded or logged out)
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('fasthub-user');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          setDisplayUser(parsed);
+        } catch (e) {
+          setDisplayUser(null);
+        }
+      } else {
+        setDisplayUser(null);
+      }
+    }
+  }, [user]);
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -40,6 +66,11 @@ const Header = () => {
       }
     };
   }, [closeTimer]);
+
+  // Close account dropdown when user logs in/out
+  useEffect(() => {
+    setIsAccountOpen(false);
+  }, [user]);
 
   // Promo slides for the top bar
   const promoSlides = [
@@ -517,25 +548,47 @@ const Header = () => {
 
             {/* Right Side Actions */}
             <div className="flex items-center space-x-4 py-2">
-              {/* User Account */}
+              {/* User Account / Dropdown */}
               <div className="relative">
-                {user ? (
-                  <div className="flex items-center space-x-2">
-                    <span className="hidden md:block text-sm">Hi, {user.name}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={logout}
-                      className="text-sm"
+                {displayUser ? (
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setIsAccountOpen((s) => !s)}
+                      className="flex items-center space-x-2 rounded-md hover:bg-gray-100 px-2 py-1"
                     >
-                      Logout
-                    </Button>
-                    {user.role === 'admin' && (
-                      <Link href="/admin">
-                        <Button variant="outline" size="sm">
-                          Admin
-                        </Button>
-                      </Link>
+                      <span className="hidden md:block text-sm">Hi, {displayUser.name}</span>
+                    </button>
+
+                    {isAccountOpen && (
+                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 ring-1 ring-black ring-opacity-5">
+                        <div className="py-1">
+                          <Link href="/account/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setIsAccountOpen(false)}>
+                            Profile
+                          </Link>
+                          <Link href="/account/orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setIsAccountOpen(false)}>
+                            Orders
+                          </Link>
+                          <Link href="/account/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setIsAccountOpen(false)}>
+                            Settings
+                          </Link>
+                          <button
+                            type="button"
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            onClick={() => {
+                              logout();
+                              setIsAccountOpen(false);
+                            }}
+                          >
+                            Logout
+                          </button>
+                          {displayUser.role === 'admin' && (
+                            <Link href="/admin" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setIsAccountOpen(false)}>
+                              Admin Panel
+                            </Link>
+                          )}
+                        </div>
+                      </div>
                     )}
                   </div>
                 ) : (

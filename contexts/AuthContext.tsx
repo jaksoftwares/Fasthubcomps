@@ -86,8 +86,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(loggedInUser);
       localStorage.setItem('fasthub-user', JSON.stringify(loggedInUser));
       return true;
-    } catch {
-      return false;
+    } catch (error) {
+      throw error;
     }
   };
 

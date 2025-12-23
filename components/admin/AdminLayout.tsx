@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 import { LayoutDashboard, Package, ShoppingCart, Wrench, Users, Settings, Menu, X, LogOut, Chrome as Home, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -10,6 +11,16 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+  const { user, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading) {
+      // If there's no user or the user is not an admin, redirect away
+      if (!user || user.role !== 'admin') {
+        router.push('/');
+      }
+    }
+  }, [user, isLoading, router]);
 
   const handleLogout = async () => {
     router.push('/');

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Mail, Lock, User } from 'lucide-react';
+import { X, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,6 +17,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '', name: '', isAdmin: false });
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [showEmailConfirmModal, setShowEmailConfirmModal] = useState<{ open: boolean; message?: string }>({
     open: false,
     message: '',
@@ -26,6 +28,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate password match on signup
+    if (!isLogin && formData.password !== confirmPassword) {
+      toast.error('Passwords do not match!');
+      return;
+    }
     setIsLoading(true);
 
     try {
@@ -34,11 +42,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         toast.success('Logged in!');
         onClose();
         setFormData({ email: '', password: '', name: '', isAdmin: false });
+        setShowPassword(false);
       } else {
         await register(formData.name, formData.email, formData.password, formData.isAdmin);
         toast.success('Account created successfully!');
         onClose();
         setFormData({ email: '', password: '', name: '', isAdmin: false });
+        setConfirmPassword('');
+        setShowPassword(false);
       }
     } catch (error: any) {
       const message = error?.message || 'Something went wrong. Please try again.';
@@ -52,6 +63,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         toast.success('Account created. Please confirm your email to continue.');
         onClose();
         setFormData({ email: '', password: '', name: '', isAdmin: false });
+        setConfirmPassword('');
+        setShowPassword(false);
         setIsLoading(false);
         return;
       }
@@ -133,7 +146,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                     <Input
                       id="password"
                       name="password"
-                      type="password"
+                      type={showPassword ? 'text' : 'password'}
                       placeholder="Enter your password"
                       value={formData.password}
                       onChange={handleInputChange}
@@ -143,7 +156,45 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                   </div>
                 </div>
 
-                Admin registration checkbox removed for signup by request
+                {!isLogin && (
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword">Confirm Password</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <Input
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="Confirm your password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className="pl-10"
+                        required={!isLogin}
+                      />
+                    </div>
+                    {confirmPassword && formData.password !== confirmPassword && (
+                      <p className="text-sm text-red-500">Passwords do not match</p>
+                    )}
+                  </div>
+                )}
+
+                {!isLogin && (
+                  <div className="flex items-center space-x-2">
+                    <input
+                      id="showPassword"
+                      type="checkbox"
+                      checked={showPassword}
+                      onChange={(e) => setShowPassword(e.target.checked)}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <Label htmlFor="showPassword" className="text-sm text-gray-700 flex items-center space-x-1 cursor-pointer">
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      <span>Show Password</span>
+                    </Label>
+                  </div>
+                )}
+
+                {/* Admin registration checkbox removed for signup by request */}
                 {!isLogin && (
                   <div className="flex items-center space-x-2">
                     <input
@@ -174,7 +225,11 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                 <div className="text-center">
                   <button
                     type="button"
-                    onClick={() => setIsLogin(!isLogin)}
+                    onClick={() => {
+                      setIsLogin(!isLogin);
+                      setConfirmPassword('');
+                      setShowPassword(false);
+                    }}
                     className="text-sm text-blue-600 hover:text-blue-700"
                   >
                     {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
