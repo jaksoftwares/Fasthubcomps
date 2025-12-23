@@ -448,14 +448,20 @@ const Header = () => {
         
         <div className="relative z-10 max-w-7xl mx-auto flex justify-between items-center text-sm">
           <div className="flex items-center justify-between sm:justify-start space-x-3">
-            <div className="flex items-center space-x-1">
+            <a 
+              href="tel:+254715242502"
+              className="flex items-center space-x-1 hover:text-blue-300 transition-colors"
+            >
               <Phone className="h-4 w-4" />
               <span className="hidden sm:inline">+254 715 242 502</span>
-            </div>
-            <div className="flex items-center space-x-1">
+            </a>
+            <a 
+              href="mailto:info@fasthub.co.ke"
+              className="flex items-center space-x-1 hover:text-blue-300 transition-colors"
+            >
               <Mail className="h-4 w-4" />
               <span className="hidden md:inline">info@fasthub.co.ke</span>
-            </div>
+            </a>
           </div>
           
           {/* Rotating Promo Messages */}

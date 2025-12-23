@@ -195,7 +195,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                 </div>
 
                 {/* Admin registration checkbox removed for signup by request */}
-                {!isLogin && (
+                {/* {!isLogin && (
                   <div className="flex items-center space-x-2">
                     <input
                       id="isAdmin"
@@ -209,7 +209,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                       Register as Admin
                     </Label>
                   </div>
-                )}
+                )} */}
                
 
                 <Button type="submit" disabled={isLoading} className="w-full bg-blue-600 hover:bg-blue-700">
