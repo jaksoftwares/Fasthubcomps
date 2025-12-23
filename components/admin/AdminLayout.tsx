@@ -131,7 +131,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
       </aside>
 
       {/* Main content */}
-      <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
+      <div className="flex-1 lg:ml-64 flex flex-col h-screen">
         <header className="sticky top-0 z-30 bg-white border-b border-gray-200">
           <div className="px-4 py-3 flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -148,9 +148,9 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
           </div>
         </header>
 
-        <main className="flex-1 px-4 py-6 lg:px-8 lg:py-8">{children}</main>
+        <main className="flex-1 overflow-y-auto px-4 py-6 lg:px-8 lg:py-8">{children}</main>
 
-        <footer className="border-t border-gray-200 px-4 py-3 text-xs text-gray-500 flex items-center justify-between">
+        <footer className="mt-auto border-t border-gray-200 px-4 py-3 text-xs text-gray-500 flex items-center justify-between">
           <span>© {new Date().getFullYear()} Fasthub Computers</span>
         </footer>
       </div>
