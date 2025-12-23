@@ -563,13 +563,13 @@ const Header = () => {
                     {isAccountOpen && (
                       <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 ring-1 ring-black ring-opacity-5">
                         <div className="py-1">
-                          <Link href="/account/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setIsAccountOpen(false)}>
+                          <Link href="/account/profile" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setIsAccountOpen(false)}>
                             Profile
                           </Link>
-                          <Link href="/account/orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setIsAccountOpen(false)}>
+                          <Link href="/account/orders" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setIsAccountOpen(false)}>
                             Orders
                           </Link>
-                          <Link href="/account/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setIsAccountOpen(false)}>
+                          <Link href="/account/settings" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setIsAccountOpen(false)}>
                             Settings
                           </Link>
                           <button
@@ -583,7 +583,7 @@ const Header = () => {
                             Logout
                           </button>
                           {displayUser.role === 'admin' && (
-                            <Link href="/admin" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setIsAccountOpen(false)}>
+                            <Link href="/admin" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setIsAccountOpen(false)}>
                               Admin Panel
                             </Link>
                           )}

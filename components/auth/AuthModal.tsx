@@ -34,6 +34,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       toast.error('Passwords do not match!');
       return;
     }
+    
     setIsLoading(true);
 
     try {
@@ -42,6 +43,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         toast.success('Logged in!');
         onClose();
         setFormData({ email: '', password: '', name: '', isAdmin: false });
+        setConfirmPassword('');
         setShowPassword(false);
       } else {
         await register(formData.name, formData.email, formData.password, formData.isAdmin);
@@ -178,21 +180,19 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                   </div>
                 )}
 
-                {!isLogin && (
-                  <div className="flex items-center space-x-2">
-                    <input
-                      id="showPassword"
-                      type="checkbox"
-                      checked={showPassword}
-                      onChange={(e) => setShowPassword(e.target.checked)}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <Label htmlFor="showPassword" className="text-sm text-gray-700 flex items-center space-x-1 cursor-pointer">
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      <span>Show Password</span>
-                    </Label>
-                  </div>
-                )}
+                <div className="flex items-center space-x-2">
+                  <input
+                    id="showPassword"
+                    type="checkbox"
+                    checked={showPassword}
+                    onChange={(e) => setShowPassword(e.target.checked)}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <Label htmlFor="showPassword" className="text-sm text-gray-700 flex items-center space-x-1 cursor-pointer">
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    <span>Show Password</span>
+                  </Label>
+                </div>
 
                 {/* Admin registration checkbox removed for signup by request */}
                 {!isLogin && (

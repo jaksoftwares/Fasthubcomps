@@ -68,7 +68,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
             <div className="space-y-1">
               {mainNavigation.map((item) => {
                 const Icon = item.icon;
-                const active = pathname === item.href || pathname.startsWith(item.href + '/');
+                const active = pathname === item.href || (pathname.startsWith(item.href + '/') && item.href !== '/admin');
 
                 return (
                   <Link

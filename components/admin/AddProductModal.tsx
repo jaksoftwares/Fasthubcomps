@@ -87,7 +87,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onPr
 
     if (isSubmitting) return;
 
-    if (!formData.name || !formData.sku || !formData.category_id || !formData.brand || !formData.description) {
+    if (!formData.name || !formData.category_id || !formData.brand || !formData.description) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -313,17 +313,6 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ isOpen, onClose, onPr
                         value={formData.name}
                         onChange={handleInputChange}
                         placeholder="e.g., Dell XPS 15 Laptop"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="sku">SKU / Product Code *(auto-generated)</Label>
-                      <Input
-                        id="sku"
-                        name="sku"
-                        value={formData.sku}
-                        placeholder="e.g., DELL-XPS-15-001"
-                        readOnly
                         required
                       />
                     </div>
