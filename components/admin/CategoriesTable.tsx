@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Search, ImageIcon, Plus, Edit2, Trash2, ListTree } from "lucide-react";
 import { toast } from "sonner";
 import { AddCategoryModal, EditCategoryModal, ManageSubcategoriesModal } from "@/components/admin/CategoryModals";
+import Loader from '@/components/ui/Loader';
 
 const CategoriesTable = () => {
   const [categories, setCategories] = useState<any[]>([]);
@@ -60,7 +61,16 @@ const CategoriesTable = () => {
   });
 
   if (loading) {
-    return <div>Loading categories...</div>;
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Categories</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Loader message="Loading categories..." />
+        </CardContent>
+      </Card>
+    );
   }
 
   if (error) {

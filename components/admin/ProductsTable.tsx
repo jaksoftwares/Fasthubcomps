@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { CreditCard as Edit, Trash2, Search, Eye } from 'lucide-react';
 import { toast } from 'sonner';
+import Loader from '@/components/ui/Loader';
 import { ProductsAPI } from '@/lib/services/products';
 import EditProductModal from '@/components/admin/EditProductModal';
 import Image from 'next/image';
@@ -48,7 +49,7 @@ const ProductsTable = () => {
           <CardTitle>All Products</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="py-6 text-center">Loading products...</div>
+          <Loader message="Loading products..." />
         </CardContent>
       </Card>
     );
