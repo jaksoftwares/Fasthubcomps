@@ -5,11 +5,21 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { CreditCard as Edit, Trash2, Search, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import Loader from '@/components/ui/Loader';
 import { ProductsAPI } from '@/lib/services/products';
 import EditProductModal from '@/components/admin/EditProductModal';
+import ViewProductModal from '@/components/admin/ViewProductModal';
 import Image from 'next/image';
 
 const ProductsTable = forwardRef((props, ref) => {
@@ -18,6 +28,8 @@ const ProductsTable = forwardRef((props, ref) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editingProduct, setEditingProduct] = useState<any | null>(null);
+  const [viewingProduct, setViewingProduct] = useState<any | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null);
   const [categories, setCategories] = useState<any[]>([]);
 
   const fetchProducts = async () => {
@@ -106,9 +118,17 @@ const ProductsTable = forwardRef((props, ref) => {
       await ProductsAPI.delete(id);
       setProducts(prev => prev.filter(product => product.id !== id));
       toast.success('Product deleted successfully');
+      setDeleteConfirm(null);
     } catch (err: any) {
       toast.error(err?.message || 'Failed to delete product');
     }
+  };
+
+  const confirmDelete = (product: any) => {
+    setDeleteConfirm({
+      id: product.id,
+      name: product.name,
+    });
   };
 
   // Prepare filtered list for rendering
@@ -192,7 +212,11 @@ const ProductsTable = forwardRef((props, ref) => {
                         </td>
                         <td className="py-3 px-4">
                           <div className="flex items-center space-x-2">
-                            <Button size="sm" variant="outline">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => setViewingProduct(product)}
+                            >
                               <Eye className="h-3 w-3" />
                             </Button>
                             <Button size="sm" variant="outline" onClick={() => setEditingProduct(product)}>
@@ -201,7 +225,7 @@ const ProductsTable = forwardRef((props, ref) => {
                             <Button 
                               size="sm" 
                               variant="outline"
-                              onClick={() => handleDelete(product.id)}
+                              onClick={() => confirmDelete(product)}
                               className="text-red-600 hover:text-red-700"
                             >
                               <Trash2 className="h-3 w-3" />
@@ -229,6 +253,37 @@ const ProductsTable = forwardRef((props, ref) => {
           }}
         />
       )}
+
+      {viewingProduct && (
+        <ViewProductModal
+          isOpen={!!viewingProduct}
+          product={viewingProduct}
+          categories={categories}
+          onClose={() => setViewingProduct(null)}
+        />
+      )}
+
+      <AlertDialog open={!!deleteConfirm} onOpenChange={(open) => !open && setDeleteConfirm(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Product?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete <strong>{deleteConfirm?.name}</strong>? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex justify-end gap-3">
+            <AlertDialogCancel onClick={() => setDeleteConfirm(null)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteConfirm && handleDelete(deleteConfirm.id)}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 });

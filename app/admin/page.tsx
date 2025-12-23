@@ -36,6 +36,7 @@ async function getAdminDashboardStats() {
   const newOrdersThisMonth = (ordersDetail.data || []).filter((o: any) => {
     const createdDate = new Date(o.created_at);
     return createdDate >= firstDayOfMonth && createdDate <= now;
+    
   }).length;
 
   // Calculate fulfilled orders
