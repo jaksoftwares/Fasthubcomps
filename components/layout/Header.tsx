@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { Search, ShoppingCart, User, Menu, X, Phone, Mail, Heart, ChevronRight, Zap, Tag, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,6 +21,15 @@ const Header = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const { isOpen: isAuthOpen, open: openAuthModal, close: closeAuthModal } = useAuthModal();
   const [searchQuery, setSearchQuery] = useState('');
+  const router = useRouter();
+  const submitSearch = (q: string) => {
+    const query = q.trim();
+    if (query) {
+      router.push(`/products?search=${encodeURIComponent(query)}`);
+    } else {
+      router.push('/products');
+    }
+  };
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [buttonPosition, setButtonPosition] = useState({ top: 0, left: 0, width: 0 });
@@ -500,9 +510,9 @@ const Header = () => {
       {/* Main Header */}
       <header className="bg-white shadow-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
-          <div className="flex flex-wrap items-center justify-between gap-3 h-auto py-3">
+          <div className="flex items-center justify-between gap-3 h-auto py-3">
             {/* Toggle Menu Button & Logo */}
-            <div className="flex items-center space-x-3 py-1">
+            <div className="flex items-center space-x-3 py-1 pr-3">
               {/* Category Menu Toggle Button */}
               <Button
                 ref={categoryButtonRef}
@@ -520,7 +530,7 @@ const Header = () => {
               </Button>
 
               {/* Logo (image only) */}
-              <Link href="/" className="flex items-center">
+              <Link href="/" className="flex items-center shrink-0">
                 <Image
                   src="/fasthub-logo-image.jpg"
                   alt="FastHub Logo"
@@ -540,20 +550,39 @@ const Header = () => {
 
             {/* Search Bar */}
             <div className="hidden md:flex flex-1 max-w-lg mx-8 py-2">
-              <div className="relative w-full">
+              <form
+                className="relative w-full"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  submitSearch(searchQuery);
+                }}
+              >
                 <Input
                   type="text"
                   placeholder="Search for products..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      submitSearch(searchQuery);
+                    }
+                  }}
+                  className="pl-10 pr-12"
                 />
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              </div>
+                <button
+                  type="submit"
+                  aria-label="Search"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 flex items-center justify-center bg-orange-500 text-white rounded"
+                >
+                  <Search className="h-4 w-4" />
+                </button>
+              </form>
             </div>
 
             {/* Right Side Actions */}
-            <div className="flex items-center space-x-4 py-2">
+            <div className="flex items-center space-x-2 md:space-x-4 py-2 flex-shrink-0">
               {/* User Account / Dropdown */}
               <div className="relative">
                 {displayUser ? (
@@ -640,18 +669,37 @@ const Header = () => {
             </div>
           </div>
 
-          {/* Mobile Search Bar */}
-          <div className="md:hidden pb-3">
-            <div className="relative w-full">
+          {/* Mobile Search (full-width, sits below header row on small screens) */}
+          <div className="md:hidden mt-2 px-3 w-full">
+            <form
+              className="relative w-full"
+              onSubmit={(e) => {
+                e.preventDefault();
+                submitSearch(searchQuery);
+              }}
+            >
               <Input
                 type="text"
                 placeholder="Search for products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    submitSearch(searchQuery);
+                  }
+                }}
+                className="pl-10 pr-12 w-full"
               />
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            </div>
+              <button
+                type="submit"
+                aria-label="Search"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 flex items-center justify-center bg-orange-500 text-white rounded"
+              >
+                <Search className="h-4 w-4" />
+              </button>
+            </form>
           </div>
         </div>
       </header>

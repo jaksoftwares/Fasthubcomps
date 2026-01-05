@@ -113,11 +113,57 @@ const ProductsPageClient: React.FC<ProductsPageClientProps> = ({ initialProducts
     let filtered = allProducts;
 
     if (filters.search) {
-      filtered = filtered.filter(product =>
-        product.name.toLowerCase().includes(filters.search.toLowerCase()) ||
-        product.brand?.toLowerCase().includes(filters.search.toLowerCase()) ||
-        product.category?.toLowerCase().includes(filters.search.toLowerCase())
-      );
+      const q = filters.search.trim().toLowerCase();
+      const tokens = q.split(/\s+/).filter(Boolean);
+
+      const scoreProduct = (product: Product) => {
+        let score = 0;
+        const name = product.name?.toLowerCase() || '';
+        const brand = product.brand?.toLowerCase() || '';
+        const category = product.category?.toLowerCase() || '';
+        const slug = product.slug?.toLowerCase() || '';
+        const desc = (product as any).description?.toLowerCase() || '';
+        const combined = `${name} ${brand} ${category} ${slug} ${desc}`;
+
+        // Full-query strong matches
+        if (name.includes(q)) score += 30;
+        if (brand.includes(q)) score += 18;
+        if (desc.includes(q)) score += 16;
+        if (category.includes(q)) score += 10;
+
+        // Token matches (give partial credit)
+        for (const t of tokens) {
+          if (name.includes(t)) score += 8;
+          if (brand.includes(t)) score += 5;
+          if (desc.includes(t)) score += 4;
+          if (category.includes(t)) score += 2;
+          if (slug.includes(t)) score += 2;
+        }
+
+        // Prefer startsWith in name
+        if (name.startsWith(q)) score += 8;
+        for (const t of tokens) {
+          if (name.startsWith(t)) score += 3;
+        }
+
+        // Fallback small match if any field contains any token
+        if (tokens.some(t => combined.includes(t))) score += 1;
+
+        return score;
+      };
+
+      const scored = allProducts
+        .map(p => ({ p, score: scoreProduct(p) }))
+        .filter(x => x.score > 0)
+        .sort((a, b) => {
+          if (b.score !== a.score) return b.score - a.score;
+          // tie-breaker: rating then name
+          if ((b.p.rating || 0) !== (a.p.rating || 0)) return (b.p.rating || 0) - (a.p.rating || 0);
+          return a.p.name.localeCompare(b.p.name);
+        })
+        .map(x => x.p);
+
+      filtered = scored;
     }
 
     if (filters.category && filters.category !== 'all') {
