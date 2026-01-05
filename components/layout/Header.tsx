@@ -509,7 +509,7 @@ const Header = () => {
 
       {/* Main Header */}
       <header className="bg-white shadow-md sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 pb-1">
           <div className="flex items-center justify-between gap-3 h-auto py-3">
             {/* Toggle Menu Button & Logo */}
             <div className="flex items-center space-x-3 py-1 pr-3">
@@ -670,7 +670,7 @@ const Header = () => {
           </div>
 
           {/* Mobile Search (full-width, sits below header row on small screens) */}
-          <div className="md:hidden mt-2 px-3 w-full">
+          <div className="md:hidden mt-2 px-3 w-full mb-3">
             <form
               className="relative w-full"
               onSubmit={(e) => {

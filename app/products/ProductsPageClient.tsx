@@ -109,6 +109,17 @@ const ProductsPageClient: React.FC<ProductsPageClientProps> = ({ initialProducts
     setAllProducts(initialProducts);
   }, [initialProducts]);
 
+  // Keep filters.search in sync with the URL `search` param so header searches
+  // (which navigate to `/products?search=...`) update the product list while
+  // the page is already mounted.
+  useEffect(() => {
+    const sp = searchParams.get('search') || '';
+    setFilters(prev => {
+      if (prev.search === sp) return prev;
+      return { ...prev, search: sp };
+    });
+  }, [searchParams]);
+
   useEffect(() => {
     let filtered = allProducts;
 
