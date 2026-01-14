@@ -1,11 +1,11 @@
 import './globals.css';
-import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import { Toaster } from '@/components/ui/sonner';
 import { CartProvider } from '@/contexts/CartContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { AuthModalProvider } from '@/contexts/AuthModalContext';
 import { WishlistProvider } from '@/contexts/WishlistContext';
+import { generateMetadata, generateCanonicalUrl } from '@/lib/seo';
 import { MessageCircle } from 'lucide-react';
 
 // 👇 Place the font files inside: app/fonts/
@@ -25,13 +25,7 @@ const inter = localFont({
   variable: '--font-inter',
 });
 
-export const metadata: Metadata = {
-  title: 'FastHub Computers - Unlocking your IT needs',
-  description:
-    'Your one-stop shop for computers, laptops, phones and accessories. Professional repair services available.',
-  keywords:
-    'computers, laptops, phones, accessories, repairs, IT services, FastHub',
-};
+export const metadata = generateMetadata({ canonical: generateCanonicalUrl('/'), isCore: true });
 
 export default function RootLayout({
   children,
