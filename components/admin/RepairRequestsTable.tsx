@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Eye, Search, Phone, Mail, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { RepairsAPI } from '@/lib/services/repairs';
+import Loader from '@/components/ui/Loader';
 
 const RepairRequestsTable = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -135,17 +136,27 @@ const RepairRequestsTable = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <span className="loader"></span>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Repair Requests</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Loader message="Loading repair requests..." />
+        </CardContent>
+      </Card>
     );
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <p className="text-red-500">{error}</p>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Repair Requests</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-red-600">{error}</div>
+        </CardContent>
+      </Card>
     );
   }
 

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { AnalyticsAPI } from '@/lib/services/analytics';
+import Loader from '@/components/ui/Loader';
 
 const AnalyticsDashboard = () => {
   const [salesData, setSalesData] = useState<any[]>([]);
@@ -46,11 +47,29 @@ const AnalyticsDashboard = () => {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Analytics</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Loader message="Loading analytics..." />
+        </CardContent>
+      </Card>
+    );
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Analytics</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-red-600">Error: {error}</div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (

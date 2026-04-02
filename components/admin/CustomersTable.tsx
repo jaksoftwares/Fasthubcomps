@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Eye, Search, Mail, Phone } from 'lucide-react';
 import { CustomersAPI } from '@/lib/services/customers';
+import Loader from '@/components/ui/Loader';
 
 const CustomersTable = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -64,11 +65,29 @@ const CustomersTable = () => {
   }
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Customers</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Loader message="Loading customers..." />
+        </CardContent>
+      </Card>
+    );
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Customers</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-red-600">Error: {error}</div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (

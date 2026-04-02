@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { SettingsAPI } from "@/lib/services/settings";
+import Loader from '@/components/ui/Loader';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 type SettingsState = {
@@ -136,8 +137,31 @@ const SettingsPanel = () => {
     toast.success("Notification settings saved");
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Settings</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Loader message="Loading settings..." />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Settings</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-red-600">Error: {error}</div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Tabs defaultValue="general" className="w-full">

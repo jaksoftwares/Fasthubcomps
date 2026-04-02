@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Eye, Search, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { OrdersAPI } from '@/lib/services/orders';
+import Loader from '@/components/ui/Loader';
 
 const OrdersTable = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -98,11 +99,29 @@ const OrdersTable = () => {
   });
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Orders</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Loader message="Loading orders..." />
+        </CardContent>
+      </Card>
+    );
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Orders</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-red-600">Error: {error}</div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (

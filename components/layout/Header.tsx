@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { Search, ShoppingCart, User, Menu, X, Phone, Mail, Heart, ChevronRight, Zap, Tag, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,6 +21,15 @@ const Header = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const { isOpen: isAuthOpen, open: openAuthModal, close: closeAuthModal } = useAuthModal();
   const [searchQuery, setSearchQuery] = useState('');
+  const router = useRouter();
+  const submitSearch = (q: string) => {
+    const query = q.trim();
+    if (query) {
+      router.push(`/products?search=${encodeURIComponent(query)}`);
+    } else {
+      router.push('/products');
+    }
+  };
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [buttonPosition, setButtonPosition] = useState({ top: 0, left: 0, width: 0 });
@@ -31,6 +41,32 @@ const Header = () => {
   const { state: wishlistState } = useWishlist();
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
   const { user, logout } = useAuth();
+  const [isAccountOpen, setIsAccountOpen] = useState(false);
+  const [displayUser, setDisplayUser] = useState<any | null>(null);
+
+  // Keep a local displayUser in sync with context user and localStorage
+  useEffect(() => {
+    // Always prioritize context user over localStorage
+    if (user) {
+      setDisplayUser(user);
+      return;
+    }
+
+    // Only use localStorage if context user is null (not yet loaded or logged out)
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('fasthub-user');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          setDisplayUser(parsed);
+        } catch (e) {
+          setDisplayUser(null);
+        }
+      } else {
+        setDisplayUser(null);
+      }
+    }
+  }, [user]);
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -40,6 +76,11 @@ const Header = () => {
       }
     };
   }, [closeTimer]);
+
+  // Close account dropdown when user logs in/out
+  useEffect(() => {
+    setIsAccountOpen(false);
+  }, [user]);
 
   // Promo slides for the top bar
   const promoSlides = [
@@ -417,14 +458,20 @@ const Header = () => {
         
         <div className="relative z-10 max-w-7xl mx-auto flex justify-between items-center text-sm">
           <div className="flex items-center justify-between sm:justify-start space-x-3">
-            <div className="flex items-center space-x-1">
+            <a 
+              href="tel:+254715242502"
+              className="flex items-center space-x-1 hover:text-blue-300 transition-colors"
+            >
               <Phone className="h-4 w-4" />
               <span className="hidden sm:inline">+254 715 242 502</span>
-            </div>
-            <div className="flex items-center space-x-1">
+            </a>
+            <a 
+              href="mailto:info@fasthub.co.ke"
+              className="flex items-center space-x-1 hover:text-blue-300 transition-colors"
+            >
               <Mail className="h-4 w-4" />
               <span className="hidden md:inline">info@fasthub.co.ke</span>
-            </div>
+            </a>
           </div>
           
           {/* Rotating Promo Messages */}
@@ -462,10 +509,10 @@ const Header = () => {
 
       {/* Main Header */}
       <header className="bg-white shadow-md sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
-          <div className="flex flex-wrap items-center justify-between gap-3 h-auto py-3">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 pb-1">
+          <div className="flex items-center justify-between gap-3 h-auto py-3">
             {/* Toggle Menu Button & Logo */}
-            <div className="flex items-center space-x-3 py-1">
+            <div className="flex items-center space-x-3 py-1 pr-3">
               {/* Category Menu Toggle Button */}
               <Button
                 ref={categoryButtonRef}
@@ -483,59 +530,100 @@ const Header = () => {
               </Button>
 
               {/* Logo (image only) */}
-              <Link href="/" className="flex items-center">
+              <Link href="/" className="flex items-center shrink-0">
                 <Image
                   src="/fasthub-logo-image.jpg"
                   alt="FastHub Logo"
                   width={200}
                   height={72}
-                  className="h-12 sm:h-20 w-auto -mr-[32px]"
+                  className="h-8 sm:h-12 w-auto -mr-[24px] -mt-4 sm:-mt-4"
                 />
                 <Image
                   src="/fasthub-logo.jpg"
                   alt="FastHub Computers"
                   width={200}
                   height={72}
-                  className="h-12 sm:h-20 w-auto"
+                  className="h-8 sm:h-12 w-auto"
                 />
               </Link>
             </div>
 
             {/* Search Bar */}
             <div className="hidden md:flex flex-1 max-w-lg mx-8 py-2">
-              <div className="relative w-full">
+              <form
+                className="relative w-full"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  submitSearch(searchQuery);
+                }}
+              >
                 <Input
                   type="text"
                   placeholder="Search for products..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      submitSearch(searchQuery);
+                    }
+                  }}
+                  className="pl-10 pr-12"
                 />
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              </div>
+                <button
+                  type="submit"
+                  aria-label="Search"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 flex items-center justify-center bg-orange-500 text-white rounded"
+                >
+                  <Search className="h-4 w-4" />
+                </button>
+              </form>
             </div>
 
             {/* Right Side Actions */}
-            <div className="flex items-center space-x-4 py-2">
-              {/* User Account */}
+            <div className="flex items-center space-x-2 md:space-x-4 py-2 flex-shrink-0">
+              {/* User Account / Dropdown */}
               <div className="relative">
-                {user ? (
-                  <div className="flex items-center space-x-2">
-                    <span className="hidden md:block text-sm">Hi, {user.name}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={logout}
-                      className="text-sm"
+                {displayUser ? (
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setIsAccountOpen((s) => !s)}
+                      className="flex items-center space-x-2 rounded-md hover:bg-gray-100 px-2 py-1"
                     >
-                      Logout
-                    </Button>
-                    {user.role === 'admin' && (
-                      <Link href="/admin">
-                        <Button variant="outline" size="sm">
-                          Admin
-                        </Button>
-                      </Link>
+                      <span className="hidden md:block text-sm">Hi, {displayUser.name}</span>
+                    </button>
+
+                    {isAccountOpen && (
+                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 ring-1 ring-black ring-opacity-5">
+                        <div className="py-1">
+                          <Link href="/account/profile" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setIsAccountOpen(false)}>
+                            Profile
+                          </Link>
+                          <Link href="/account/orders" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setIsAccountOpen(false)}>
+                            Orders
+                          </Link>
+                          <Link href="/account/settings" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setIsAccountOpen(false)}>
+                            Settings
+                          </Link>
+                          <button
+                            type="button"
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            onClick={() => {
+                              logout();
+                              setIsAccountOpen(false);
+                            }}
+                          >
+                            Logout
+                          </button>
+                          {displayUser.role === 'admin' && (
+                            <Link href="/admin" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setIsAccountOpen(false)}>
+                              Admin Panel
+                            </Link>
+                          )}
+                        </div>
+                      </div>
                     )}
                   </div>
                 ) : (
@@ -581,18 +669,37 @@ const Header = () => {
             </div>
           </div>
 
-          {/* Mobile Search Bar */}
-          <div className="md:hidden pb-3">
-            <div className="relative w-full">
+          {/* Mobile Search (full-width, sits below header row on small screens) */}
+          <div className="md:hidden mt-2 px-3 w-full mb-3">
+            <form
+              className="relative w-full"
+              onSubmit={(e) => {
+                e.preventDefault();
+                submitSearch(searchQuery);
+              }}
+            >
               <Input
                 type="text"
                 placeholder="Search for products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    submitSearch(searchQuery);
+                  }
+                }}
+                className="pl-10 pr-12 w-full"
               />
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            </div>
+              <button
+                type="submit"
+                aria-label="Search"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 flex items-center justify-center bg-orange-500 text-white rounded"
+              >
+                <Search className="h-4 w-4" />
+              </button>
+            </form>
           </div>
         </div>
       </header>
