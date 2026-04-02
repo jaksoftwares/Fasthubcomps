@@ -2,12 +2,13 @@ import { Metadata } from 'next';
 import axios from 'axios';
 
 type Props = {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
   children: React.ReactNode;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const slug = params.slug;
+  const resolvedParams = await params;
+  const slug = resolvedParams.slug;
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://fasthub.co.ke';
 
   try {
