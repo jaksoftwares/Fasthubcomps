@@ -50,7 +50,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         if (product.slug) { // Ensure slug exists
           urls.push({
             url: `${baseUrl}/products/${product.slug}`,
-            lastModified: new Date(product.updatedAt),
+            lastModified: product.updatedAt ? new Date(product.updatedAt) : new Date(),
             changeFrequency: 'monthly',
             priority: 0.6,
             images: product.images?.map(img => img.url),
@@ -75,7 +75,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         if (category.slug) {
           urls.push({
             url: `${baseUrl}/products?category=${category.slug}`, // Assuming category filter
-            lastModified: new Date(category.updatedAt),
+            lastModified: category.updatedAt ? new Date(category.updatedAt) : new Date(),
             changeFrequency: 'weekly',
             priority: 0.7,
           });
