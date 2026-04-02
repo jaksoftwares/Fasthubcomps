@@ -17,13 +17,6 @@ export const dynamic = 'force-dynamic';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://fasthub.co.ke';
-  const isProduction = process.env.NODE_ENV === 'production';
-
-  // In non-production, return empty sitemap to prevent indexing
-  if (!isProduction) {
-    return [];
-  }
-
   const urls: MetadataRoute.Sitemap = [];
 
   // Static pages
