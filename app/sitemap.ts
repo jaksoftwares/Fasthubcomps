@@ -44,7 +44,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   try {
     // Dynamic products
-    const productsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/products`, {
+    const productsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://fasthub.co.ke'}/api/products`, {
       next: { revalidate: 3600 }, // Cache for 1 hour
     });
 
@@ -69,7 +69,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   try {
     // Dynamic categories
-    const categoriesResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/categories`, {
+    const categoriesResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://fasthub.co.ke'}/api/categories`, {
       next: { revalidate: 3600 },
     });
 
