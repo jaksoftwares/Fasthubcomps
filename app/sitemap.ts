@@ -4,7 +4,7 @@ interface Product {
   id: string;
   slug: string;
   updatedAt: string;
-  images?: Array<{ url: string; alt?: string }>;
+  images?: string[];
 }
 
 interface Category {
@@ -53,7 +53,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             lastModified: product.updatedAt ? new Date(product.updatedAt) : new Date(),
             changeFrequency: 'monthly',
             priority: 0.6,
-            images: product.images?.map(img => img.url),
+            images: Array.isArray(product.images) ? product.images.filter(Boolean) : undefined,
           });
         }
       }
