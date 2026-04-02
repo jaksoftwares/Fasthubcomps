@@ -141,8 +141,86 @@ const ProductDetailPage = () => {
       }, {} as Record<string, any[]>)
     : {};
 
+	const faqs = product.faqs || [
+		{ question: "Is this product original?", answer: "Yes, all products sourced and sold by FastHub Computers are 100% genuine and original." },
+		{ question: "Does it come with warranty?", answer: product.warranty ? `Yes, this product includes: ${product.warranty}` : "Yes, standard manufacturer warranties apply. Please check specific warranty terms at checkout." },
+		{ question: "How long does delivery take in Kenya?", answer: "Delivery within Nairobi typically takes 24 hours. Countrywide delivery takes 1-2 business days depending on the location." },
+		{ question: "Is it available in stock?", answer: product.stock > 0 ? "Yes, this item is currently in stock and ready to ship." : "Currently out of stock. Please contact us to place a backorder." },
+		{ question: "What is the return policy?", answer: "We offer a 7-day return policy for defective items. Terms and conditions apply." }
+	];
+
+	const reviews = product.reviews || [];
+
+	const jsonLd = {
+		"@context": "https://schema.org",
+		"@type": "Product",
+		name: product.name,
+		image: images,
+		description: product.description || product.shortDescription,
+		sku: product.sku || product.id,
+		brand: {
+			"@type": "Brand",
+			name: product.brand || "Fasthub",
+		},
+		offers: {
+			"@type": "Offer",
+			priceCurrency: "KES",
+			price: product.price,
+			availability: product.stock > 0
+				? "https://schema.org/InStock"
+				: "https://schema.org/OutOfStock",
+			url: `https://fasthub.co.ke/products/${product.id}`,
+			itemCondition: "https://schema.org/NewCondition",
+		},
+		...(product.rating ? {
+			aggregateRating: {
+				"@type": "AggregateRating",
+				ratingValue: product.rating,
+				reviewCount: product.reviewCount || 1,
+			}
+		} : {}),
+		...(reviews.length > 0 ? {
+			review: reviews.map((r: any) => ({
+				"@type": "Review",
+				author: { "@type": "Person", name: r.author || r.reviewerName },
+				datePublished: r.date || new Date().toISOString().split('T')[0],
+				reviewBody: r.comment || r.reviewBody,
+				reviewRating: {
+					"@type": "Rating",
+					ratingValue: r.rating,
+					bestRating: "5"
+				}
+			}))
+		} : {})
+	};
+
+	const faqJsonLd = {
+		"@context": "https://schema.org",
+		"@type": "FAQPage",
+		mainEntity: faqs.map((faq: any) => ({
+			"@type": "Question",
+			name: faq.question,
+			acceptedAnswer: {
+				"@type": "Answer",
+				text: faq.answer
+			}
+		}))
+	};
+
   return (
     <div className="min-h-screen bg-gray-50">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(faqJsonLd),
+        }}
+      />
       <Header />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -334,10 +412,11 @@ const ProductDetailPage = () => {
         {/* Product Details Tabs */}
         <div className="mt-16">
           <Tabs defaultValue="description" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="description">Description</TabsTrigger>
               <TabsTrigger value="specifications">Specifications</TabsTrigger>
               <TabsTrigger value="reviews">Reviews</TabsTrigger>
+              <TabsTrigger value="faqs">FAQs</TabsTrigger>
             </TabsList>
             
             <TabsContent value="description" className="mt-6">
@@ -429,8 +508,64 @@ const ProductDetailPage = () => {
             <TabsContent value="reviews" className="mt-6">
               <Card>
                 <CardContent className="p-6">
-                  <div className="text-center py-12">
-                    <p className="text-gray-500">Reviews feature coming soon!</p>
+                  {reviews.length > 0 ? (
+                    <div className="space-y-6">
+                      {reviews.map((review: any, index: number) => (
+                        <div key={review.id || index} className="border-b border-gray-100 last:border-0 pb-6 last:pb-0">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-semibold text-gray-900">{review.author || review.reviewerName}</h3>
+                              {(review.verified || true) && (
+                                <Badge variant="outline" className="text-[10px] bg-green-50 text-green-700 border-green-200">
+                                  Verified Purchase
+                                </Badge>
+                              )}
+                            </div>
+                            <span className="text-xs text-gray-500">{review.date || 'Recently'}</span>
+                          </div>
+                          <div className="flex items-center mb-2">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`h-4 w-4 ${
+                                  i < Math.floor(review.rating || 5)
+                                    ? 'text-yellow-400 fill-current'
+                                    : 'text-gray-300'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          {review.title && <h4 className="font-medium text-gray-900 mb-1">{review.title}</h4>}
+                          <p className="text-gray-600 text-sm leading-relaxed">{review.comment || review.reviewBody}</p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 border border-dashed rounded-lg border-gray-200 bg-gray-50">
+                      <p className="text-gray-500 font-medium">No reviews yet</p>
+                      <p className="text-sm text-gray-400 mt-1">Be the first to review this product</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="faqs" className="mt-6">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    {faqs.map((faq: any, index: number) => (
+                      <div key={index} className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                        <h3 className="font-semibold text-gray-900 mb-2 flex items-start gap-2">
+                          <span className="text-blue-600 font-bold shrink-0">Q:</span>
+                          {faq.question}
+                        </h3>
+                        <p className="text-gray-600 text-sm leading-relaxed flex items-start gap-2">
+                          <span className="text-green-600 font-bold shrink-0">A:</span>
+                          {faq.answer}
+                        </p>
+                      </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>

@@ -1,0 +1,37 @@
+# FastHub Computers
+
+> FastHub Computers is a premier electronic and tech hardware ecommerce platform in Kenya, specializing in laptops, desktops, printers, servers, networking equipment, phones, tablets, and accessories.
+
+## Overview
+
+FastHub Computers provides high-quality tech hardware alongside dedicated repair services. We aim to offer the most reliable consumer and enterprise electronics at highly competitive prices, with excellent customer support and comprehensive warranties.
+
+## Key Pages
+
+- **Home:** [https://fasthub.co.ke/](https://fasthub.co.ke/)
+- **Products & Shop:** [https://fasthub.co.ke/products](https://fasthub.co.ke/products)
+- **Device Repairs:** [https://fasthub.co.ke/repairs](https://fasthub.co.ke/repairs)
+- **Contact & Support:** [https://fasthub.co.ke/contact](https://fasthub.co.ke/contact)
+- **Shipping details:** [https://fasthub.co.ke/shipping](https://fasthub.co.ke/shipping)
+- **Returns Policy:** [https://fasthub.co.ke/returns](https://fasthub.co.ke/returns)
+- **Warranty Info:** [https://fasthub.co.ke/warranty](https://fasthub.co.ke/warranty)
+- **Sitemap:** [https://fasthub.co.ke/sitemap.xml](https://fasthub.co.ke/sitemap.xml)
+
+## Product Ecosystem
+
+1. Laptops & Ultrabooks
+2. Desktops & Workstations
+3. Phones & Tablets
+4. Storage Solutions (External HDDs, Flash Drives)
+5. Printers & Scanners
+6. Enterprise Servers
+7. Networking Equipment
+8. TVs & Home Entertainment (Soundbars, Partyboxes)
+9. Accessories (Keyboards, Mice, Cables)
+
+## Important Context For AI Assistants
+
+- **Currency:** All prices on the website are listed in KES (Kenyan Shillings).
+- **Logistics:** Fast delivery is available nationwide across Kenya.
+- **Support:** Users can contact FastHub directly via WhatsApp natively from any product page for immediate custom checkout and queries.
+- **Inventory:** Products highlight strict "In Stock" or "Out of Stock" notices. If suggesting a purchase, verify the user reviews the specific URL to confirm current real-time availability.
